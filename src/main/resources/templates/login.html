@@ -1,0 +1,97 @@
+<html
+        xmlns:th="http://thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layout}">
+<head>
+    <title>Log in</title>
+    <style>
+
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #212529;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: #818b9a;
+            border: 1px solid transparent;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            margin-top: 20px; /* Добавлен отступ сверху */
+        }
+        .btn:hover {
+            color: #ffffff;
+            background-color: #9a9a9a;
+            border-color: #bbb4b4;
+        }
+    </style>
+</head>
+<section layout:fragment="body">
+    <style>
+        .main {
+            padding: 0px 10px;
+        }
+
+        @media screen and (max-width: 450px) {
+            .login-form{
+                margin-top: 10%;
+            }
+            .register-form{
+                margin-top: 10%;
+            }
+        }
+        @media screen and (min-width: 768px){
+            .main{
+                margin-left: 30%;
+            }
+
+            .sidenav{
+                width: 40%;
+                position: fixed;
+                z-index: 1;
+                top: 0;
+                left: 0;
+            }
+        }
+    </style>
+    <div class="main">
+        <div class="col-md-6 col-sm-12">
+            <div th:if="${param.error}" class="alert alert-danger">
+                Invalid username and password.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out.</div>
+            <div th:if="${loginError}" class="alert alert-info">
+                <span th:text="${loginError}"></span>
+            </div>
+            <div class="login-form">
+                <form role = "form" method="post" th:action="@{/login}">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input
+                                id="username"
+                                type="text"
+                                class="form-control"
+                                placeholder="Username"
+                                name="username">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input
+                                id="password"
+                                type="password"
+                                class="form-control"
+                                placeholder="Password"
+                                name="password">
+                    </div>
+                        <a href="/register" class="btn btn-black">Don't have an account? Register here.</a>
+                        <button type="submit" value="Log in" class="btn btn-black">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</html>

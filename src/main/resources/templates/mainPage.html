@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div layout:fragment="body">
+    <div class="container mt-4">
+        <div class="row">
+            <div th:each="booking : ${availableBookings}" class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${booking.title}"></h5>
+                        <p class="card-text">
+                            <strong>Type:</strong>
+                            <span th:text="${!#strings.isEmpty(booking.type)} ? ${booking.type} : 'Not specified'"></span>
+                        </p>
+                        <p class="card-text">
+                            <strong>Price:</strong>
+                            <span th:text="${booking.price != null} ? ${#numbers.formatDecimal(booking.price, 1, 2) + ' ' + booking.currency} : 'Not specified'"></span>
+                        </p>
+                        <p class="card-text">
+                            <strong>Location:</strong><br>
+                            Country: <span th:text="${!#strings.isEmpty(booking.country)} ? ${booking.country} : 'Not specified'"></span><br>
+                            City: <span th:text="${!#strings.isEmpty(booking.city)} ? ${booking.city} : 'Not specified'"></span><br>
+                            Address: <span th:text="${!#strings.isEmpty(booking.address)} ? ${booking.address} : 'Not specified'"></span>
+                        </p>
+                        <p class="card-text">
+                            <strong>Capacity:</strong> <span th:text="${booking.capacity != null} ? ${booking.capacity} : 'Not specified'"></span>
+                        </p>
+                        <p class="card-text">
+                            <strong>Available Spots:</strong>
+                            <span th:text="${booking.capacity != null && booking.neighborCount != null} ? ${booking.capacity - booking.neighborCount} : 'Not specified'"></span>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a class="btn btn-primary btn-sm w-100" th:href="@{/bookings/{bookingId}(bookingId=${booking.id})}">Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
