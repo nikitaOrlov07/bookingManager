@@ -8,11 +8,12 @@
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
-<body>
-<div layout:fragment="body">
+<body layout:fragment="body">
+<section>
     <div class="container mt-4">
+        <h2 style="color: white">Available booking:</h2>
         <div class="row">
-            <div th:each="booking : ${availableBookings}" class="col-md-4 mb-4">
+            <div th:each="booking : ${availableBookings.data}" class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title" th:text="${booking.title}"></h5>
@@ -45,6 +46,6 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 </body>
 </html>

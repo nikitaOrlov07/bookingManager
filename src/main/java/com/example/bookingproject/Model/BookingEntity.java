@@ -28,7 +28,7 @@ public class BookingEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private  boolean occupied;
+    private  Boolean occupied;
 
     // Money
     private Double price;
@@ -63,4 +63,11 @@ public class BookingEntity {
     @ToString.Exclude
     @JsonManagedReference
     private List<Attachment> attachments = new ArrayList<>();
+
+    // Advert author
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private UserEntity author;
+
+
 }

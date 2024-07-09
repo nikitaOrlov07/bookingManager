@@ -78,6 +78,11 @@ public class UserEntity {
     private List<Chat> chats = new ArrayList<>();
 
 
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<BookingEntity> authoredBookings = new ArrayList<>();
+
+
     // without this -> will be error in ChatController - deleteChat
     @Override
     public boolean equals(Object o) {
