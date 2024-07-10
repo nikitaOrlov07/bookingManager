@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 2750px;
+        }
+        .booking-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Устанавливаем ширину на 100% от контейнера */
+            margin: 0 auto; /* Центрируем карточку */
+        }
+        .booking-image {
+            height: 400px; /* Увеличиваем высоту изображения */
+            object-fit: cover;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .card-body {
+            padding: 2rem; /* Увеличиваем внутренние отступы */
+        }
+        .badge {
+            font-size: 0.8rem;
+        }
+        .author-avatar {
+            width: 70px; /* Увеличиваем размер аватара */
+            height: 70px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .row {
+            margin-bottom: 2rem; /* Увеличиваем отступ между рядами */
+        }
+        h2.card-title {
+            font-size: 2.5rem; /* Увеличиваем размер заголовка */
+            margin-bottom: 1.5rem;
+        }
+        .card-text {
+            font-size: 1.1rem; /* Увеличиваем размер текста описания */
+            margin-bottom: 2rem;
+        }
+        .btn-primary {
+            font-size: 1.2rem; /* Увеличиваем размер кнопки */
+            padding: 0.75rem 2rem;
+        }
+    </style>
+</head>
+<body layout:fragment="body">
+<div class="container my-5">
+    <div class="card booking-card">
+        <div class="card-body">
+            <h2 class="card-title" th:text="${booking.title}">Booking Title</h2>
+            <p class="card-text" th:text="${booking.description}">Booking description goes here...</p>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><i class="fas fa-map-marker-alt"></i> <span th:text="${(booking.address != null && !booking.address.isEmpty() ? booking.address : 'no specify') +
+            (booking.city != null && !booking.city.isEmpty() ? ', ' + booking.city : '') +
+            (booking.country != null && !booking.country.isEmpty() ? ', ' + booking.country : '')}">no specify</span></p>
+                    <p><i class="fas fa-tag"></i> <span th:text="${booking.type != null ? booking.type : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-bed"></i> <span th:text="${booking.numberOfRooms != null ? booking.numberOfRooms + ' rooms' : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-users"></i> <span th:text="${booking.capacity != null ? booking.capacity + ' guests' : 'no specify'}">no specify</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><i class="fas fa-dollar-sign"></i> <span th:text="${booking.price != null ? booking.price + ' ' + (booking.currency != null ? booking.currency : '') + ' per night' : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-home"></i> <span th:text="${booking.neighborCount != null ? booking.neighborCount + ' neighbors' : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-key"></i> Status: <span th:text="${booking.occupied != null ? (booking.occupied ? 'Occupied' : 'Available') : 'no specify'}"
+                                                                th:class="${booking.occupied != null ? (booking.occupied ? 'text-danger' : 'text-success') : ''}">no specify</span></p>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h5>Amenities</h5>
+                <th:block th:if="${booking != null and booking.amenities != null and !booking.amenities.isEmpty()}">
+                <span th:each="amenity : ${booking.amenities}"
+                      th:text="${amenity}"
+                      class="badge bg-primary me-2">
+                </span>
+                </th:block>
+                <span th:if="${booking == null or booking.amenities == null or booking.amenities.isEmpty()}"
+                      class="badge bg-secondary me-2">no specify</span>
+            </div>
+            <!--Foto Attachment -->
+            <div>
+                <h5>Attachment</h5>
+            <div class="row" style="margin-right: 5px">
+                <div th:if="${booking != null and booking.attachments.isEmpty()}" class="alert alert-primary">
+                  No attachment available
+                </div>
+                <div th:if="${booking.attachments != null and !booking.attachments.isEmpty()}" th:each="file : ${booking.attachments}" class="col-md-6 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body" th:if="${file != null}">
+                            <h5 class="card-title" th:text="${file.fileName}"></h5>
+                            <p class="card-text">Creator: <span th:text="${file.creator}"></span></p>
+                            <p class="card-text">Time: <small class="text-muted" th:text="${file.timestamp}"></small></p>
+                            <a th:href="@{/view/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">View</a>
+                            <a th:href="@{/download/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 110px; bottom: 5px; width:100px; height: 35px">Download</a>
+                            <!--
+                            <form method="post" th:action="@{/projects/{projectId}/delete/{fileId}(projectId=${projectId},fileId=${file.id})}">
+                                <input type="submit" value="Delete" class="btn btn-danger" style="position: absolute; right: 215px; bottom: 5px; width:100px; height: 35px">
+                            </form>
+                            -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="mb-3">
+                <h5>Host</h5>
+                <div class="d-flex align-items-center">
+                    <img src="https://via.placeholder.com/50" alt="Host Avatar" class="author-avatar me-3">
+                    <div>
+                        <h6 th:text="${booking.author.username}">Host Name</h6>
+                        <p class="text-muted mb-0" th:text="${'Joined ' + booking.author.creationDate}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h5>Comments (<span th:text="${booking.comments.size()}">2</span>)</h5>
+                <div th:if="${booking != null and booking.comments.isEmpty()}" class="alert alert-primary">
+                    No comments available
+                </div>
+                <div class="card mb-2" th:each="comment : ${booking.comments}">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted" th:text="${comment.user.username}">User Name</h6>
+                        <p class="card-text" th:text="${comment.text}">Comment content goes here...</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#" class="btn btn-primary">Book Now</a>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

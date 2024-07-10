@@ -22,7 +22,7 @@ import java.util.Objects;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserEntity {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY )
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     private String username;
     private String email;
@@ -30,7 +30,8 @@ public class UserEntity {
     private String town;
     private Long phoneNumber;
     private int roleId; // {0,1}
-    String creationDate;
+    private String creationDate;
+
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER , cascade = CascadeType.ALL)

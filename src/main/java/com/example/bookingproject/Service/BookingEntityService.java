@@ -7,6 +7,10 @@ import com.example.bookingproject.Model.BookingEntity;
 import java.util.List;
 
 public interface BookingEntityService {
-    BookingPagination getAllAvailableBooking();
-    BookingPagination findBookingsByParameters(BookingType bookingType, boolean occupied, String country, String city, String address, String query, String sort, int pageNo, int pageSize);
+
+    BookingPagination getAllAvailableBooking(int pageNo, int pageSize);
+
+    BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String query, String sort, int pageNo, int pageSize);
+
+    BookingEntity findById(Long bookingId);
 }

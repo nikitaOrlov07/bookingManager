@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -22,10 +24,12 @@ public class MainController {
     }
 
     @GetMapping("/home")
-    public String mainPage(Model model)
+    public String mainPage(Model model,
+                           @RequestParam(value="pageNo", defaultValue="0",required=false) int pageNo,
+                           @RequestParam(value="pageSize", defaultValue="12",required=false) int pageSize)
     {
-        BookingPagination availableBookings = bookingService.getAllAvailableBooking();
-        model.addAttribute("availableBookings", availableBookings);
+        BookingPagination availableBookings = bookingService.getAllAvailableBooking(pageNo,pageSize);
+        model.addAttribute("bookings", availableBookings);
         return "mainPage";
     }
     @GetMapping("/home/find")
@@ -43,7 +47,18 @@ public class MainController {
     )
     {
         BookingPagination bookings = bookingService.findBookingsByParameters(bookingType,occupied,country,city,address,query,sort,pageNo,pageSize);
+        bookings.getData().forEach(bookingEntity -> System.out.println(bookingEntity.getTitle()));
         model.addAttribute("bookings", bookings);
         return "mainPage";
+    }
+    @GetMapping("/bookings/{bookingId}")
+    public String getBookingDetailPage(@PathVariable("bookingId") Long bookingId,
+                                       Model model)
+    {
+        BookingEntity bookingEntity = bookingService.findById(bookingId);
+        if(bookingEntity == null)
+            return "redirect:/home?operationError";
+        model.addAttribute("booking",bookingEntity);
+        return "detailPage";
     }
 }

@@ -29,6 +29,9 @@ public class BookingEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
     private  Boolean occupied;
+    private Double rating;
+    @ElementCollection
+    List<String> amenities;
 
     // Money
     private Double price;
@@ -68,6 +71,8 @@ public class BookingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
+
+
 
 
 }

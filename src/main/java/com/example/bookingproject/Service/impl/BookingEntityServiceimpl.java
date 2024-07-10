@@ -5,6 +5,7 @@ import com.example.bookingproject.Dto.BookingPagination;
 import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Repository.BookingEntityRepository;
 import com.example.bookingproject.Service.BookingEntityService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,8 +21,43 @@ public class BookingEntityServiceimpl implements BookingEntityService{
     private BookingEntityRepository bookingRepository;
     Page<BookingEntity> bookingPage =null;
     @Override
-    public BookingPagination getAllAvailableBooking() {
+    public BookingPagination getAllAvailableBooking(int pageNo, int pageSize) {
 
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        bookingPage = bookingRepository.findAll(pageable);
+        List<BookingEntity> bookingList = bookingPage.getContent();
+        BookingPagination bookingPagination = BookingPagination.builder()
+                .data(bookingList)
+                .pageNo(bookingPage.getNumber())
+                .pageSize(bookingPage.getSize())
+                .totalElements(bookingPage.getTotalElements())
+                .totalPages(bookingPage.getTotalPages())
+                .last(bookingPage.isLast())
+                .build();
+        return bookingPagination;
+    }
+    @Transactional
+    @Override
+    public BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String query, String sort, int pageNo, int pageSize) {
+        Sort sort_object = Sort.unsorted(); // by rating , by bookingsize
+        if(sort!=null && !sort.isEmpty())
+        {
+            if(sort.equals("capacity"))
+                sort_object=Sort.by(Sort.Direction.DESC,"capacity");
+            else if(sort.equals("price"))
+                sort_object=Sort.by(Sort.Direction.DESC,"price");
+            else if(sort.equals("rating"))
+                sort_object=Sort.by(Sort.Direction.DESC,"rating");
+
+        }
+        Pageable pageable = PageRequest.of(pageNo, pageSize, sort_object);
+        if (query != null && query.length() > 0) {
+            bookingPage= bookingRepository.getBookingEntitiesByQuery(query, pageable);
+        }
+
+        if (query == null) {
+            bookingPage= bookingRepository.findByParameters(bookingType, occupied, country, city, address, pageable);
+        }
         List<BookingEntity> bookingList = bookingPage.getContent();
         BookingPagination bookingPagination = BookingPagination.builder()
                 .data(bookingList)
@@ -35,30 +71,8 @@ public class BookingEntityServiceimpl implements BookingEntityService{
     }
 
     @Override
-    public BookingPagination findBookingsByParameters(BookingType bookingType, boolean occupied, String country, String city, String address, String query, String sort, int pageNo, int pageSize) {
-        Sort sort_object = Sort.unsorted(); // by rating , by bookingsize
-        Pageable pageable = PageRequest.of(pageNo, pageSize, sort_object);
-
-
-        if (query != null && query.length() > 0) {
-            bookingPage= bookingRepository.getBookingEntitiesByQuery(query, pageable);
-        }
-
-        if (query == null) {
-            bookingPage= bookingRepository.findByParameters(bookingType, occupied, country, city, address, pageable);
-        }
-
-        List<BookingEntity> bookingList = bookingPage.getContent();
-        BookingPagination bookingPagination = BookingPagination.builder()
-                .data(bookingList)
-                .pageNo(bookingPage.getNumber())
-                .pageSize(bookingPage.getSize())
-                .totalElements(bookingPage.getTotalElements())
-                .totalPages(bookingPage.getTotalPages())
-                .last(bookingPage.isLast())
-                .build();
-        return bookingPagination;
-
+    public BookingEntity findById(Long bookingId) {
+        return bookingRepository.findById(bookingId).orElse(null);
     }
 
 
