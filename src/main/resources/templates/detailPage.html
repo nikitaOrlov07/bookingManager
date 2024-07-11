@@ -18,17 +18,17 @@
         .booking-card {
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%; /* Устанавливаем ширину на 100% от контейнера */
-            margin: 0 auto; /* Центрируем карточку */
+            width: 100%;
+            margin: 0 auto;
         }
         .booking-image {
-            height: 400px; /* Увеличиваем высоту изображения */
+            height: 400px;
             object-fit: cover;
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
         }
         .card-body {
-            padding: 2rem; /* Увеличиваем внутренние отступы */
+            padding: 2rem;
         }
         .badge {
             font-size: 0.8rem;
@@ -51,29 +51,43 @@
             margin-bottom: 2rem;
         }
         .btn-primary {
-            font-size: 1.2rem; /* Увеличиваем размер кнопки */
-            padding: 0.75rem 2rem;
+            font-size: 1rem; /* Увеличиваем размер кнопки */
+            padding: 0.25rem 1.25rem;
         }
     </style>
 </head>
 <body layout:fragment="body">
 <div class="container my-5">
+    <div th:if="${param.bookingSuccessfullyCreate}" class="alert alert-success" id="bookingCreationSuccess">
+        Booking was successfully created
+    </div>
+    <div th:if="${param.successfullyUpdated}" class="alert alert-success" id="successfullyUpdated">
+        Booking was successfully updated
+    </div>
     <div class="card booking-card">
         <div class="card-body">
             <h2 class="card-title" th:text="${booking.title}">Booking Title</h2>
+            <div style="margin-top: 20px;">
+                <form th:if="${user != null and (booking.getAuthor().equals(user) or booking.companyName.equals(user.companyName))}" method="post"
+                       th:action="@{delete/{bookingId}(bookingId=${booking.id})}" style="display: inline-block; margin-right: 10px" onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                    <button class="btn btn-primary">Delete</button>
+                </form>
+                <a th:if="${user != null and (booking.getAuthor().equals(user) or booking.companyName.equals(user.companyName))}" th:href="@{update/{bookingId}(bookingId=${booking.getId()})}" class="btn btn-primary" style="display: inline-block; margin-right: 10px">Update</a>
+
+            </div>
             <p class="card-text" th:text="${booking.description}">Booking description goes here...</p>
 
             <div class="row mb-3">
                 <div class="col-md-6">
                     <p><i class="fas fa-map-marker-alt"></i> <span th:text="${(booking.address != null && !booking.address.isEmpty() ? booking.address : 'no specify') +
-            (booking.city != null && !booking.city.isEmpty() ? ', ' + booking.city : '') +
-            (booking.country != null && !booking.country.isEmpty() ? ', ' + booking.country : '')}">no specify</span></p>
+(booking.city != null && !booking.city.isEmpty() ? ', ' + booking.city : '') +
+(booking.country != null && !booking.country.isEmpty() ? ', ' + booking.country : '')}">no specify</span></p>
                     <p><i class="fas fa-tag"></i> <span th:text="${booking.type != null ? booking.type : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-bed"></i> <span th:text="${booking.numberOfRooms != null ? booking.numberOfRooms + ' rooms' : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-users"></i> <span th:text="${booking.capacity != null ? booking.capacity + ' guests' : 'no specify'}">no specify</span></p>
                 </div>
                 <div class="col-md-6">
-                    <p><i class="fas fa-dollar-sign"></i> <span th:text="${booking.price != null ? booking.price + ' ' + (booking.currency != null ? booking.currency : '') + ' per night' : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-dollar-sign"></i> <span th:text="${booking.price != null ? booking.price + ' ' + (booking.currency != null ? booking.currency : '') + ' ' + (booking.bookingTime != null && !booking.bookingTime.toString().isEmpty() ? 'per ' + booking.bookingTime : 'no specify') : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-home"></i> <span th:text="${booking.neighborCount != null ? booking.neighborCount + ' neighbors' : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-key"></i> Status: <span th:text="${booking.occupied != null ? (booking.occupied ? 'Occupied' : 'Available') : 'no specify'}"
                                                                 th:class="${booking.occupied != null ? (booking.occupied ? 'text-danger' : 'text-success') : ''}">no specify</span></p>
@@ -88,14 +102,14 @@
                       class="badge bg-primary me-2">
                 </span>
                 </th:block>
-                <span th:if="${booking == null or booking.amenities == null or booking.amenities.isEmpty()}"
+                <span th:if="${booking == null or booking.amenities == null or booking.amenities.isEmpty() or booking.amenities.get(0).trim().isEmpty()}"
                       class="badge bg-secondary me-2">no specify</span>
             </div>
             <!--Foto Attachment -->
             <div>
                 <h5>Attachment</h5>
             <div class="row" style="margin-right: 5px">
-                <div th:if="${booking != null and booking.attachments.isEmpty()}" class="alert alert-primary">
+                <div th:if="${booking != null and booking.attachments.isEmpty()}" class="alert alert-primary" style="margin-top: 5px;margin-left: 5px">
                   No attachment available
                 </div>
                 <div th:if="${booking.attachments != null and !booking.attachments.isEmpty()}" th:each="file : ${booking.attachments}" class="col-md-6 mb-3">
@@ -147,5 +161,13 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        hideAlert('bookingCreationSuccess');
+        hideAlert('successfullyUpdated');
+    });
+</script>
 </body>
 </html>

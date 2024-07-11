@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers(new AntPathRequestMatcher("/home")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/home/find")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/bookings/{bookingId}")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/static/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
@@ -48,6 +49,9 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/login?logout=true") // URL для перенаправления после выхода из системы
+                        .invalidateHttpSession(true) // завершение сессии
+                        .deleteCookies("JSESSIONID") // удаление cookies
                         .permitAll()
                 );
         return http.build();}

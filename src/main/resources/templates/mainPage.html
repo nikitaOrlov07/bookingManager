@@ -56,6 +56,9 @@
         <div th:if="${param.operationError != null}" class="alert alert-danger" id="operationError">
             You are not allowed to do this operation
         </div>
+        <div th:if="${param.successDeletedBooking}" class="alert alert-success" id="successDeletedBooking">
+            Booking was successfully deleted
+        </div>
         <!-- Existing content -->
         <h2 style="color: white">Available booking:</h2>
         <div th:if="${bookings != null and bookings.data.isEmpty()}" class="alert alert-light">
@@ -275,6 +278,7 @@
             });
             $(document).ready(function() {
                 hideAlert('operationError');
+                hideAlert('successDeletedBooking');
             });
         </script>
     </div>

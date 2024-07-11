@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{layout}">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body layout:fragment="body">
+<div class="container mt-5">
+    <h2>Add New Booking</h2>
+    <form id="bookingForm" th:action="@{/bookings/create/save}" method="post" th:object="${bookingDto}">
+        <div class="mb-3">
+            <label for="attributeSelect" class="form-label">Select Attribute</label>
+            <div class="input-group">
+                <select class="form-select" id="attributeSelect">
+                    <option value="">Choose...</option>
+                    <option value="title">Title*</option>
+                    <option value="type">Type*</option>
+                    <option value="description">Description</option>
+                    <option value="amenities">Amenities</option>
+                    <option value="price">Price*</option>
+                    <option value="bookingTime">Booking Time*</option>
+                    <option value="currency">Currency*</option>
+                    <option value="country">Country*</option>
+                    <option value="city">City*</option>
+                    <option value="address">Address*</option>
+                    <option value="capacity">Capacity</option>
+                    <option value="numbersOfRoom">Number of Rooms</option>
+                </select>
+                <button class="btn btn-outline-secondary" type="button" id="addAttributeBtn">+</button>
+            </div>
+        </div>
+
+        <div id="title" class="mb-3 hidden">
+            <label for="titleInput" class="form-label">Title*</label>
+            <input type="text" class="form-control" id="titleInput" th:field="*{title}" required>
+            <span class="error-message" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+        </div>
+
+        <div id="type" class="mb-3 hidden">
+            <label for="typeSelect" class="form-label">Type*</label>
+            <select class="form-select" id="typeSelect" th:field="*{type}" required>
+                <option value="">Choose...</option>
+                <option th:each="bookingType : ${T(com.example.bookingproject.Config.BookingType).values()}"
+                        th:value="${bookingType}" th:text="${bookingType}"></option>
+            </select>
+            <span class="error-message" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></span>
+        </div>
+
+        <div id="description" class="mb-3 hidden">
+            <label for="descriptionTextarea" class="form-label">Description</label>
+            <textarea class="form-control" id="descriptionTextarea" th:field="*{description}" rows="3"></textarea>
+        </div>
+
+        <div id="amenities" class="mb-3 hidden">
+            <label for="amenitiesInput" class="form-label">Amenities</label>
+            <input type="text" class="form-control" id="amenitiesInput" placeholder="List the amenities separated by commas" th:field="*{amenities}">
+        </div>
+
+        <div id="price" class="mb-3 hidden">
+            <label for="priceInput" class="form-label">Price*</label>
+            <input type="number" class="form-control" id="priceInput" th:field="*{price}" step="0.01" required min="0.01">
+            <span class="error-message" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+        </div>
+
+        <div id="currency" class="mb-3 hidden">
+            <label for="currencySelect" class="form-label">Currency*</label>
+            <select class="form-select" id="currencySelect" th:field="*{currency}" required>
+                <option value="">Choose...</option>
+                <option th:each="currencyType : ${T(com.example.bookingproject.Config.Currency).values()}"
+                        th:value="${currencyType}" th:text="${currencyType}"></option>
+            </select>
+            <span class="error-message" th:if="${#fields.hasErrors('currency')}" th:errors="*{currency}"></span>
+        </div>
+
+        <div id="bookingTime" class="mb-3 hidden">
+            <label for="bookingTimeSelect" class="form-label">Booking Time*</label>
+            <select class="form-select" id="bookingTimeSelect" th:field="*{bookingTime}" required>
+                <option value="">Choose...</option>
+                <option th:each="bookingTimeType : ${T(com.example.bookingproject.Config.BookingTime).values()}"
+                        th:value="${bookingTimeType}" th:text="${bookingTimeType}"></option>
+            </select>
+            <span class="error-message" th:if="${#fields.hasErrors('bookingTime')}" th:errors="*{bookingTime}"></span>
+        </div>
+
+        <div id="country" class="mb-3 hidden">
+            <label for="countryInput" class="form-label">Country*</label>
+            <input type="text" class="form-control" id="countryInput" th:field="*{country}" required>
+            <span class="error-message" th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></span>
+        </div>
+
+        <div id="city" class="mb-3 hidden">
+            <label for="cityInput" class="form-label">City*</label>
+            <input type="text" class="form-control" id="cityInput" th:field="*{city}" required>
+            <span class="error-message" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></span>
+        </div>
+
+        <div id="address" class="mb-3 hidden">
+            <label for="addressInput" class="form-label">Address*</label>
+            <input type="text" class="form-control" id="addressInput" th:field="*{address}" required>
+            <span class="error-message" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+        </div>
+
+        <div id="capacity" class="mb-3 hidden">
+            <label for="capacityInput" class="form-label">Capacity</label>
+            <input type="number" class="form-control" id="capacityInput" th:field="*{capacity}">
+        </div>
+
+        <div id="numbersOfRoom" class="mb-3 hidden">
+            <label for="numbersOfRoomInput" class="form-label">Number of Rooms</label>
+            <input type="text" class="form-control" id="numbersOfRoomInput" th:field="*{numberOfRooms}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('addAttributeBtn').addEventListener('click', function() {
+        const select = document.getElementById('attributeSelect');
+        const selectedValue = select.value;
+        if (selectedValue) {
+            const field = document.getElementById(selectedValue);
+            if (field.classList.contains('hidden')) {
+                field.classList.remove('hidden');
+                select.querySelector(`option[value="${selectedValue}"]`).disabled = true;
+                select.value = '';
+            }
+        }
+    });
+</script>
+</body>
+</html>

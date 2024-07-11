@@ -31,6 +31,7 @@ public class UserEntity {
     private Long phoneNumber;
     private int roleId; // {0,1}
     private String creationDate;
+    private String companyName;
 
 
     @ToString.Exclude

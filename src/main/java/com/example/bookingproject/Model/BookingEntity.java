@@ -1,5 +1,6 @@
 package com.example.bookingproject.Model;
 
+import com.example.bookingproject.Config.BookingTime;
 import com.example.bookingproject.Config.BookingType;
 import com.example.bookingproject.Config.Currency;
 import com.example.bookingproject.Model.Security.UserEntity;
@@ -20,6 +21,7 @@ import java.util.List;
 public class BookingEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String title;
@@ -28,13 +30,15 @@ public class BookingEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private  Boolean occupied;
+    private  Boolean occupied; // will be false if neihborCount = capacity
     private Double rating;
+    private  String companyName;
     @ElementCollection
-    List<String> amenities;
+    private List<String> amenities;
 
     // Money
     private Double price;
+    private BookingTime bookingTime;
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
@@ -44,7 +48,7 @@ public class BookingEntity {
     private String address;
 
     // amount
-    private int neighborCount;
+    private int neighborCount; // will increase , when users book
     private int capacity;
     private int numberOfRooms;
 

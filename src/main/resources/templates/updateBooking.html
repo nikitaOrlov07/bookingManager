@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<section layout:fragment="body" class="py-5">
+    <div class="container">
+        <form role="form" method="post" th:action="@{/bookings/update/save}" th:object="${bookingDto}">
+            <input type="hidden" th:field="*{id}" />
+            <div class="form-row">
+                <div class="form-group col-md-6 mb-3">
+                    <label for="title" class="text-color">Title:</label>
+                    <input type="text" class="form-control" id="title" name="title" th:field="*{title}" placeholder="Title">
+                    <p th:if="${#fields.hasErrors('title')}" class="text-danger" th:errors="*{title}"></p>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label for="type" class="text-color">Type:</label>
+                    <select class="form-control" id="type" name="type" th:field="*{type}">
+                        <option th:each="bookingType : ${T(com.example.bookingproject.Config.BookingType).values()}"
+                                th:value="${bookingType}" th:text="${bookingType}"></option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('type')}" class="text-danger" th:errors="*{type}"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="description" class="text-color">Description:</label>
+                    <textarea class="form-control" id="description" name="description" th:field="*{description}"
+                              style="width: 100%; height: 150px" maxlength="500" oninput="updateCharCount()"></textarea>
+                    <div id="charCount">0 / 500</div>
+                    <p th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="amenities" class="text-color">Amenities:</label>
+                    <input type="text" class="form-control" id="amenities" name="amenities" th:field="*{amenities}" placeholder="Amenities (comma-separated)">
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label for="price" class="text-color">Price:</label>
+                    <input type="number" class="form-control" id="price" name="price" th:field="*{price}" step="0.01" min="0.01">
+                    <p th:if="${#fields.hasErrors('price')}" class="text-danger" th:errors="*{price}"></p>
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label for="currency" class="text-color">Currency:</label>
+                    <select class="form-control" id="currency" name="currency" th:field="*{currency}">
+                        <option th:each="currencyType : ${T(com.example.bookingproject.Config.Currency).values()}"
+                                th:value="${currencyType}" th:text="${currencyType}"></option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('currency')}" class="text-danger" th:errors="*{currency}"></p>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label for="country" class="text-color">Country:</label>
+                    <input type="text" class="form-control" id="country" name="country" th:field="*{country}" placeholder="Country">
+                    <p th:if="${#fields.hasErrors('country')}" class="text-danger" th:errors="*{country}"></p>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label for="city" class="text-color">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" th:field="*{city}" placeholder="City">
+                    <p th:if="${#fields.hasErrors('city')}" class="text-danger" th:errors="*{city}"></p>
+                </div>
+
+                <div class="form-group col-md-4 mb-3">
+                    <label for="address" class="text-color">Address:</label>
+                    <input type="text" class="form-control" id="address" name="address" th:field="*{address}" placeholder="Address">
+                    <p th:if="${#fields.hasErrors('address')}" class="text-danger" th:errors="*{address}"></p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="companyName" class="text-color">Company Name:</label>
+                    <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}" placeholder="Company Name">
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label for="capacity" class="text-color">Capacity:</label>
+                    <input type="number" class="form-control" id="capacity" name="capacity" th:field="*{capacity}" min="0">
+                </div>
+
+                <div class="form-group col-md-6 mb-3">
+                    <label for="numberOfRooms" class="text-color">Number of Rooms:</label>
+                    <input type="number" class="form-control" id="numberOfRooms" name="numberOfRooms" th:field="*{numberOfRooms}" min="0">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px">Update</button>
+        </form>
+    </div>
+</section>
+
+<script>
+    function updateCharCount() {
+        let description = document.getElementById('description');
+        let charCount = document.getElementById('charCount');
+        let remainingChars = 500 - description.value.length;
+        charCount.innerHTML = description.value.length + ' / 500';
+
+        if (remainingChars <= 0) {
+            charCount.style.color = 'red';
+        } else {
+            charCount.style.color = 'black';
+        }
+    }
+    window.onload = updateCharCount;
+</script>
+</body>
+</html>
