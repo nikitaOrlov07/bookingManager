@@ -44,6 +44,7 @@ public class UserServiceimpl implements UserService{
         userEntity.setEmail(registrationDto.getEmail());
         userEntity.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
         userEntity.setTown(registrationDto.getTown());
+        userEntity.setCompanyName(registrationDto.getCompanyName());
         userEntity.setPhoneNumber(registrationDto.getPhoneNumber());
         // User account creation date
         LocalDate date = LocalDate.now();

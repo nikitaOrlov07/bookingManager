@@ -1,4 +1,4 @@
-package com.example.bookingproject.Config;
+package com.example.bookingproject.WebSocketConf;
 
 public enum MessageType {
     CHAT,

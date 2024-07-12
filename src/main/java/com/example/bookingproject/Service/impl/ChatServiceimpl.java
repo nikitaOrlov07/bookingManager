@@ -104,23 +104,6 @@ public class ChatServiceimpl implements ChatService {
 
         chatRepository.delete(chat);
     }
-    @Override
-    public List<Chat> findAllByParticipants(UserEntity deletedUser) {
-        return chatRepository.findByParticipantsContains(deletedUser);
-    }
 
-    @Transactional // In a @Transactional method, Hibernate automatically tracks changes to managed entities and persists them at the end of the transaction.
-    @Override
-    public void clearMessages(Chat chat) {
-        Chat managedChat = chatRepository.findById(chat.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Chat not found"));
 
-        List<Message> messages = new ArrayList<>(managedChat.getMessages());
-        for (Message message : messages) {
-            managedChat.getMessages().remove(message);
-            messageService.deleteMessage(message,message.getUser(),chat);
-        }
-
-        managedChat.getMessages().clear();
-    }
 }

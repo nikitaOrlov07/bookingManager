@@ -54,6 +54,19 @@
             font-size: 1rem; /* Увеличиваем размер кнопки */
             padding: 0.25rem 1.25rem;
         }
+        .company-banner {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .company-name {
+            font-size: 1.5rem;
+            color: #007bff;
+            margin: 0;
+            text-align: center;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body layout:fragment="body">
@@ -65,10 +78,15 @@
         Booking was successfully updated
     </div>
     <div class="card booking-card">
+        <div th:if="${user != null and user.companyName != null and !user.companyName.isEmpty()}" class="company-banner">
+            <h3 class="company-name" th:text="${user.companyName}"></h3>
+        </div>
         <div class="card-body">
             <h2 class="card-title" th:text="${booking.title}">Booking Title</h2>
             <div style="margin-top: 20px;">
-                <form th:if="${user != null and (booking.getAuthor().equals(user) or booking.companyName.equals(user.companyName))}" method="post"
+                <form th:if="${user != null and booking != null and
+((booking.getAuthor() != null and booking.getAuthor().equals(user)) or
+ (booking.companyName != null and user.companyName != null and booking.companyName.equals(user.companyName)))}" method="post"
                        th:action="@{delete/{bookingId}(bookingId=${booking.id})}" style="display: inline-block; margin-right: 10px" onsubmit="return confirm('Are you sure you want to delete this booking?');">
                     <button class="btn btn-primary">Delete</button>
                 </form>
@@ -106,6 +124,7 @@
                       class="badge bg-secondary me-2">no specify</span>
             </div>
             <!--Foto Attachment -->
+            <hr style="border: 2px solid #ccc; border-color: #032738">
             <div>
                 <h5>Attachment</h5>
             <div class="row" style="margin-right: 5px">
@@ -130,6 +149,7 @@
                 </div>
             </div>
             </div>
+            <hr style="border: 2px solid #ccc; border-color: #032738">
             <div class="mb-3">
                 <h5>Host</h5>
                 <div class="d-flex align-items-center">
@@ -137,10 +157,32 @@
                     <div>
                         <h6 th:text="${booking.author.username}">Host Name</h6>
                         <p class="text-muted mb-0" th:text="${'Joined ' + booking.author.creationDate}"></p>
+                        <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${booking.getAuthor().getId()})}">Chat</a>
                     </div>
                 </div>
             </div>
 
+
+
+            <div th:if="${companyBookingEntities != null and !companyBookingEntities.isEmpty()}" class="mb-4">
+                <hr style="border: 2px solid #ccc; border-color: #032738">
+                <h5>Other Bookings from this Company</h5>
+                <div class="horizontal-scroll">
+                    <div class="card-deck d-flex">
+                        <div th:each="companyBooking : ${companyBookingEntities}" class="card mr-3" style="min-width: 18rem; max-width: 18rem;">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${companyBooking.title}">Booking Title</h5>
+                                <p class="card-text" th:text="${#strings.abbreviate(companyBooking.description, 100)}">Booking description...</p>
+                                <p class="card-text">
+                                    <small class="text-muted" th:text="${'Price: ' + companyBooking.price + ' ' + companyBooking.currency}">Price</small>
+                                </p>
+                                <a th:href="@{/bookings/{bookingId}(bookingId=${companyBooking.id})}" class="btn btn-primary">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr style="border: 2px solid #ccc; border-color: #032738">
             <div class="mb-3">
                 <h5>Comments (<span th:text="${booking.comments.size()}">2</span>)</h5>
                 <div th:if="${booking != null and booking.comments.isEmpty()}" class="alert alert-primary">

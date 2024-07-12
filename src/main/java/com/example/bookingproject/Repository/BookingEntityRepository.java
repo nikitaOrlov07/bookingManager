@@ -25,10 +25,14 @@ public interface BookingEntityRepository extends JpaRepository<BookingEntity,Lon
             "(:occupied IS NULL OR b.occupied = :occupied) AND " +
             "(:country IS NULL OR b.country = :country) AND " +
             "(:city IS NULL OR b.city = :city) AND " +
-            "(:address IS NULL OR b.address = :address)")
+            "(:address IS NULL OR b.address = :address) AND "+
+            "(:companyName IS NULL OR b.companyName = :companyName)")
     Page<BookingEntity> findByParameters(@Param("bookingType") BookingType bookingType, @Param("occupied") Boolean occupied, @Param("country") String country,
                                        @Param("city") String city,
                                        @Param("address") String address,
+                                       @Param("companyName") String companyName,
                                        Pageable pageable
     );
+    List<BookingEntity> findBookingEntitiesByCompanyName(String companyName);
+
 }

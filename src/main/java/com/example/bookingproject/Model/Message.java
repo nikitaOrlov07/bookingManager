@@ -1,8 +1,7 @@
 package com.example.bookingproject.Model;
 
 
-import com.example.bookingproject.Config.MessageType;
-import com.example.bookingproject.Model.Chat;
+import com.example.bookingproject.WebSocketConf.MessageType;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

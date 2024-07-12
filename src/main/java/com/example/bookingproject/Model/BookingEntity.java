@@ -58,7 +58,7 @@ public class BookingEntity {
     private List<UserEntity> confirmedUsers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "bookRequest")
-    private List<UserEntity> requestingUsers = new ArrayList<>();
+    private List<UserEntity> requestingUsers = new ArrayList<>(); // те которые заплатили
 
     // Comments For BookingEntity
     @ToString.Exclude

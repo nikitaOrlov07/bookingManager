@@ -17,7 +17,4 @@ public interface ChatService {
 
     void delete(Chat chat);
 
-    List<Chat> findAllByParticipants(UserEntity deletedUser);
-
-    void clearMessages(Chat chat);
 }

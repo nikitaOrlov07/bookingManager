@@ -80,8 +80,9 @@ public class UserEntity {
     private List<Chat> chats = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER ,mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @JsonIgnore
     private List<BookingEntity> authoredBookings = new ArrayList<>();
 
 

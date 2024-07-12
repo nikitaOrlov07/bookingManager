@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 @Slf4j
 public class MainController {
@@ -33,6 +35,8 @@ public class MainController {
     {
         BookingPagination availableBookings = bookingService.getAllAvailableBooking(pageNo,pageSize);
         log.error("User name: "+ SecurityUtil.getSessionUser());
+        if(SecurityUtil.getSessionUser() != null)
+            log.error("User company name: "+ userService.findByUsername(SecurityUtil.getSessionUser()).getCompanyName());
         model.addAttribute("bookings", availableBookings);
         return "mainPage";
     }
@@ -45,25 +49,32 @@ public class MainController {
                             @RequestParam(value = "address",required = false) String address,
                             @RequestParam(value="query",required = false) String query,
                             @RequestParam(value = "sort",required = false) String sort,
+                            @RequestParam(value = "companyName",required = false) String companyName,
                             // for  pagination
                             @RequestParam(value="pageNo", defaultValue="0",required=false) int pageNo,
                             @RequestParam(value="pageSize", defaultValue="12",required=false) int pageSize
     )
     {
-        BookingPagination bookings = bookingService.findBookingsByParameters(bookingType,occupied,country,city,address,query,sort,pageNo,pageSize);
+        BookingPagination bookings = bookingService.findBookingsByParameters(bookingType,occupied,country,city,address,query,sort,companyName,pageNo,pageSize);
         bookings.getData().forEach(bookingEntity -> System.out.println(bookingEntity.getTitle()));
         model.addAttribute("bookings", bookings);
         return "mainPage";
     }
     @GetMapping("/bookings/{bookingId}")
     public String getBookingDetailPage(@PathVariable("bookingId") Long bookingId,
-                                       Model model)
-    {
+                                       Model model) {
         BookingEntity bookingEntity = bookingService.findById(bookingId);
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-        if(bookingEntity == null)
+        List<BookingEntity> companyBookingEntities = null;
+        if (bookingEntity == null)
             return "redirect:/home?operationError";
+        if (bookingEntity.getCompanyName() != null){
+            companyBookingEntities = bookingService.findBookingsByCompanyName(bookingEntity.getCompanyName());
+            companyBookingEntities.remove(bookingEntity);
+         }
+
         model.addAttribute("booking",bookingEntity);
+        model.addAttribute("companyBookingEntities",companyBookingEntities);
         model.addAttribute("user",user);
         return "detailPage";
     }

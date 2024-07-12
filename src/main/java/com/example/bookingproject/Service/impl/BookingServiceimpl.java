@@ -9,20 +9,17 @@ import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Repository.BookingEntityRepository;
-import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.AttachmentService;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.CommentService;
 import com.example.bookingproject.Service.Security.UserService;
 import jakarta.transaction.Transactional;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -55,7 +52,7 @@ public class BookingServiceimpl implements BookingService {
     }
     @Transactional
     @Override
-    public BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String query, String sort, int pageNo, int pageSize) {
+    public BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String query, String sort, String companyName, int pageNo, int pageSize) {
         Sort sort_object = Sort.unsorted(); // by rating , by bookingsize
         if(sort!=null && !sort.isEmpty())
         {
@@ -73,7 +70,7 @@ public class BookingServiceimpl implements BookingService {
         }
 
         if (query == null) {
-            bookingPage= bookingRepository.findByParameters(bookingType, occupied, country, city, address, pageable);
+            bookingPage= bookingRepository.findByParameters(bookingType, occupied, country, city, address,companyName, pageable);
         }
         List<BookingEntity> bookingList = bookingPage.getContent();
         BookingPagination bookingPagination = BookingPagination.builder()
@@ -137,6 +134,11 @@ public class BookingServiceimpl implements BookingService {
             }
         }
         bookingRepository.delete(bookingEntity);
+    }
+
+    @Override
+    public List<BookingEntity> findBookingsByCompanyName(String companyName) {
+        return bookingRepository.findBookingEntitiesByCompanyName(companyName);
     }
 
 

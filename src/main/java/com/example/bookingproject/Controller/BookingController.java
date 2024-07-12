@@ -62,6 +62,7 @@ public class BookingController {
         }
         log.info("save for create is working");
         bookingDto.setAuthor(user);
+        bookingDto.setCompanyName(user.getCompanyName());
         BookingEntity savedBooking = bookingsService.saveBooking(bookingDto);
         return "redirect:/bookings/"+ savedBooking.getId()+"?bookingSuccessfullyCreate";
     }

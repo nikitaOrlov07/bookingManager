@@ -13,5 +13,6 @@ public class RegistrationDto {
     @NotEmpty(message ="Must be not empty")
     private String password;
     private String town;
+    private String companyName;
     private Long phoneNumber;
 }

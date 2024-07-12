@@ -21,8 +21,6 @@ public class MessageServiceimpl implements MessageService {
     @Autowired
     private MessageRepository messageRepository;
     @Autowired
-    private UserService userService;
-    @Autowired
     private ChatService chatService;
     @Override
     public List<Message> findAllChatMessage(Long chaId) {
@@ -46,7 +44,9 @@ public class MessageServiceimpl implements MessageService {
     @Transactional
     @Override
     public void deleteMessage(Message message, UserEntity user, Chat chat) {
-
+        user.getMessages().remove(message);
+        chat.getMessages().remove(message);
+        messageRepository.delete(message);
+        System.out.println("Deleted message: " + message.getId());
     }
-    
 }
