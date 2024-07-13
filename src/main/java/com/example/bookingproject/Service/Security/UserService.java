@@ -4,6 +4,7 @@ package com.example.bookingproject.Service.Security;
 
 import com.example.bookingproject.Dto.security.RegistrationDto;
 
+import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Security.UserEntity;
 
 import java.util.List;
@@ -23,4 +24,9 @@ public interface UserService {
 
     void save(UserEntity currentUser);
 
+    List<UserEntity> findAllByLikedComments(Comment comment);
+
+    List<UserEntity> findAllByDislikedComments(Comment comment);
+
+    void actionComment(String dislike, Comment comment);
 }

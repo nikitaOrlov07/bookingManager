@@ -8,66 +8,7 @@
     <title>Booking Details</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 2750px;
-        }
-        .booking-card {
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            margin: 0 auto;
-        }
-        .booking-image {
-            height: 400px;
-            object-fit: cover;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
-        .card-body {
-            padding: 2rem;
-        }
-        .badge {
-            font-size: 0.8rem;
-        }
-        .author-avatar {
-            width: 70px; /* Увеличиваем размер аватара */
-            height: 70px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-        .row {
-            margin-bottom: 2rem; /* Увеличиваем отступ между рядами */
-        }
-        h2.card-title {
-            font-size: 2.5rem; /* Увеличиваем размер заголовка */
-            margin-bottom: 1.5rem;
-        }
-        .card-text {
-            font-size: 1.1rem; /* Увеличиваем размер текста описания */
-            margin-bottom: 2rem;
-        }
-        .btn-primary {
-            font-size: 1rem; /* Увеличиваем размер кнопки */
-            padding: 0.25rem 1.25rem;
-        }
-        .company-banner {
-            background-color: #f8f9fa;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .company-name {
-            font-size: 1.5rem;
-            color: #007bff;
-            margin: 0;
-            text-align: center;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/detailPage.css}" />
 </head>
 <body layout:fragment="body">
 <div class="container my-5">
@@ -137,8 +78,8 @@
                             <h5 class="card-title" th:text="${file.fileName}"></h5>
                             <p class="card-text">Creator: <span th:text="${file.creator}"></span></p>
                             <p class="card-text">Time: <small class="text-muted" th:text="${file.timestamp}"></small></p>
-                            <a th:href="@{/view/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">View</a>
-                            <a th:href="@{/download/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 110px; bottom: 5px; width:100px; height: 35px">Download</a>
+                            <a th:href="@{/files/view/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">View</a>
+                            <a th:href="@{/files/download/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 110px; bottom: 5px; width:100px; height: 35px">Download</a>
                             <!--
                             <form method="post" th:action="@{/projects/{projectId}/delete/{fileId}(projectId=${projectId},fileId=${file.id})}">
                                 <input type="submit" value="Delete" class="btn btn-danger" style="position: absolute; right: 215px; bottom: 5px; width:100px; height: 35px">
@@ -183,18 +124,111 @@
                 </div>
             </div>
             <hr style="border: 2px solid #ccc; border-color: #032738">
+            <div>
+                <!-- Form for adding comment -->
+                <form th:action="@{/reviews/bookings/{bookingId}/save(bookingId=${booking.id})}" method="post">
+                    <div class="rating mb-3">
+                        <h5>Rate this booking:</h5>
+                        <div class="stars">
+                            <span class="star" data-value="1">&#9733;</span>
+                            <span class="star" data-value="2">&#9733;</span>
+                            <span class="star" data-value="3">&#9733;</span>
+                            <span class="star" data-value="4">&#9733;</span>
+                            <span class="star" data-value="5">&#9733;</span>
+                        </div>
+                        <input type="hidden" id="ratingValue" name="rating" value="0">
+                    </div>
+                    <textarea id="description" name="text" placeholder="Write your comment..." required rows="7" cols="200" style="resize: none;" maxlength="300" oninput="updateCharCount()"></textarea>
+                    <div style="color: #000000">
+                        <span id="charCount">0</span>/300 characters used
+                    </div>
+                    <input type="hidden" th:value="${booking.id}"/>
+                    <button type="submit" class="btn btn-secondary" style="margin-bottom: 50px;">Submit Review</button>
+                </form>
+            </div>
             <div class="mb-3">
-                <h5>Comments (<span th:text="${booking.comments.size()}">2</span>)</h5>
-                <div th:if="${booking != null and booking.comments.isEmpty()}" class="alert alert-primary">
-                    No comments available
+                <h5>Reviews (<span th:text="${booking.getComments.size()}">2</span>)</h5>
+                <div th:if="${booking != null and booking.getComments.isEmpty()}" class="alert alert-primary">
+                    No reviews available
                 </div>
-                <div class="card mb-2" th:each="comment : ${booking.comments}">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted" th:text="${comment.user.username}">User Name</h6>
-                        <p class="card-text" th:text="${comment.text}">Comment content goes here...</p>
+                <div style="overflow-y: auto;overflow-x: hidden;max-height: 850px;">
+                    <div class="card mb-2" th:each="comment : ${booking.getComments}">
+                        <div class="card-body position-relative">
+                            <h6 class="card-subtitle mb-2 text-muted" th:text="${comment.user.username}">User Name</h6>
+
+                            <!-- Rating display -->
+                            <div class="mb-2">
+                                <strong>Rating: </strong>
+                                <span th:text="${comment.rating}">5</span>/5
+                                <span class="stars">
+                    <span th:each="star : ${#numbers.sequence(1, 5)}"
+                          th:class="${star <= comment.rating ? 'star filled' : 'star'}">&#9733;</span>
+                </span>
+                            </div>
+
+                            <!-- Likes and Dislikes info -->
+                            <div class="mb-2">
+                                <strong>Likes: </strong><span th:text="${comment.likes}"></span>
+                                <strong class="ml-3">Dislikes: </strong><span th:text="${comment.dislikes}"></span>
+                            </div>
+
+                            <p class="card-text" th:text="${comment.text}">Review text</p>
+
+                            <!-- Delete button - top right -->
+                            <form th:if="${user != null and (user.getComments().contains(comment) or booking.author.equals(user))}"
+                                  th:action="@{/reviews/delete/{reviewId}(reviewId=${comment.id})}"
+                                  method="post"
+                                  class="position-absolute"
+                                  style="top: 10px; right: 10px;">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+
+                            <!-- Like and Dislike buttons - bottom left -->
+                            <form th:action="@{/reviews/{reviewId}/action(reviewId=${comment.id})}"
+                                  method="post"
+                                  class="position-absolute"
+                                  style="bottom: 10px; left: 10px;">
+                                <button name="interaction" value="like" type="submit" class="btn btn-outline-primary btn-sm mr-2">👍</button>
+                                <button name="interaction" value="dislike" type="submit" class="btn btn-outline-secondary btn-sm">👎</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <script th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    const stars = document.querySelectorAll('.rating .star');
+                    const ratingInput = document.getElementById('ratingValue');
+
+                    stars.forEach(star => {
+                        star.addEventListener('click', () => {
+                            const value = star.getAttribute('data-value');
+                            ratingInput.value = value;
+                            highlightStars(value);
+                        });
+
+                        star.addEventListener('mouseover', () => {
+                            const value = star.getAttribute('data-value');
+                            highlightStars(value);
+                        });
+                    });
+
+                    document.querySelector('.rating .stars').addEventListener('mouseout', () => {
+                        highlightStars(ratingInput.value);
+                    });
+                });
+
+                function highlightStars(value) {
+                    const stars = document.querySelectorAll('.rating .star');
+                    stars.forEach(star => {
+                        star.style.color = star.getAttribute('data-value') <= value ? 'gold' : 'gray';
+                    });
+                }
+
+                // Initialize char count on page load
+                updateCharCount();
+            </script>
 
             <a href="#" class="btn btn-primary">Book Now</a>
 

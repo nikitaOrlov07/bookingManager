@@ -33,6 +33,9 @@ public class BookingEntity {
     private  Boolean occupied; // will be false if neihborCount = capacity
     private Double rating;
     private  String companyName;
+    // Conditions
+    // @ElementCollection
+    // private List<String> conditions;
     @ElementCollection
     private List<String> amenities;
 

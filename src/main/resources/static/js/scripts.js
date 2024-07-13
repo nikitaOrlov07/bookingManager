@@ -6,3 +6,8 @@ function hideAlert(alertId) {
         }
     }, 5000); // after 5 seconds -> hide alert
 }
+function updateCharCount() {
+    const textarea = document.getElementById('description');
+    const charCount = textarea.value.length;
+    document.getElementById('charCount').textContent = charCount;
+}

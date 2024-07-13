@@ -9,7 +9,7 @@
 <body>
 <section layout:fragment="body" class="py-5">
     <div class="container">
-        <form role="form" method="post" th:action="@{/bookings/update/save}" th:object="${bookingDto}">
+        <form role="form" method="post" th:action="@{/bookings/update/save}" th:object="${bookingDto}" enctype="multipart/form-data">
             <input type="hidden" th:field="*{id}" />
             <div class="form-row">
                 <div class="form-group col-md-6 mb-3">
@@ -73,6 +73,22 @@
                     <p th:if="${#fields.hasErrors('address')}" class="text-danger" th:errors="*{address}"></p>
                 </div>
 
+                <div id="existingFileList" class="mb-3">
+                    <h5>Existing Files:</h5>
+                    <div th:each="attachment : *{attachments}" class="mb-2">
+                        <span th:text="${attachment.fileName}"></span>
+                        <button type="button" class="btn btn-sm btn-danger delete-file" th:data-id="${attachment.id}">Delete</button>
+                        <a th:href="@{${attachment.viewUrl}}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                    </div>
+                </div>
+
+                <input type="hidden" id="deletedFileIds" name="deletedFileIds">
+
+                <div class="form-group mb-3">
+                    <label for="fileInput" class="text-color">Add New Files:</label>
+                    <input type="file" class="form-control" id="fileInput" name="newFiles" multiple accept="image/*,video/*">
+                </div>
+
                 <div class="form-group mb-3">
                     <label for="companyName" class="text-color">Company Name:</label>
                     <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}" placeholder="Company Name">
@@ -94,19 +110,70 @@
 </section>
 
 <script>
-    function updateCharCount() {
-        let description = document.getElementById('description');
-        let charCount = document.getElementById('charCount');
-        let remainingChars = 500 - description.value.length;
-        charCount.innerHTML = description.value.length + ' / 500';
+    document.addEventListener('DOMContentLoaded', function() {
+        const deletedFileIds = new Set();
+        const deletedFileIdsInput = document.getElementById('deletedFileIds');
+        const fileInput = document.getElementById('fileInput');
+        const existingFileList = document.getElementById('existingFileList');
+        const form = document.querySelector('form');
 
-        if (remainingChars <= 0) {
-            charCount.style.color = 'red';
-        } else {
-            charCount.style.color = 'black';
+        // Function to update character count
+        function updateCharCount() {
+            const description = document.getElementById('description');
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = `${description.value.length} / 500`;
         }
-    }
-    window.onload = updateCharCount;
+
+        // Initialize character count
+        updateCharCount();
+
+        // Add event listener for description input
+        document.getElementById('description').addEventListener('input', updateCharCount);
+
+        // Handle deletion of existing files
+        document.querySelectorAll('.delete-file').forEach(button => {
+            button.addEventListener('click', function() {
+                const fileId = this.getAttribute('data-id');
+                deletedFileIds.add(fileId);
+                this.closest('div').style.display = 'none';
+                deletedFileIdsInput.value = Array.from(deletedFileIds).join(',');
+            });
+        });
+
+        // Handle addition of new files
+        fileInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            for (let file of files) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'mb-2';
+                fileItem.innerHTML = `
+                <span>${file.name}</span>
+                <button type="button" class="btn btn-sm btn-danger remove-new-file">Remove</button>
+            `;
+                existingFileList.appendChild(fileItem);
+
+                fileItem.querySelector('.remove-new-file').addEventListener('click', function() {
+                    fileItem.remove();
+                    // Remove file from fileInput
+                    const dt = new DataTransfer();
+                    const { files } = fileInput;
+                    for (let i = 0; i < files.length; i++) {
+                        const f = files[i];
+                        if (f.name !== file.name) dt.items.add(f);
+                    }
+                    fileInput.files = dt.files;
+                });
+            }
+        });
+
+        // Prevent form submission if there are no files
+        form.addEventListener('submit', function(event) {
+            if (fileInput.files.length === 0 && deletedFileIds.size === 0) {
+                event.preventDefault();
+                alert('Please select at least one file to upload or delete an existing file.');
+            }
+        });
+    });
 </script>
 </body>
 </html>

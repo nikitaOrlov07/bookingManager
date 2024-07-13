@@ -6,24 +6,32 @@ import com.example.bookingproject.Dto.BookingPagination;
 import com.example.bookingproject.Mapper.BookingMapper;
 import com.example.bookingproject.Model.Attachment;
 import com.example.bookingproject.Model.BookingEntity;
+import com.example.bookingproject.Model.Rating;
 import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Repository.BookingEntityRepository;
+import com.example.bookingproject.Repository.RattingRepository;
+import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.AttachmentService;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.CommentService;
 import com.example.bookingproject.Service.Security.UserService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class BookingServiceimpl implements BookingService {
     @Autowired
     private BookingEntityRepository bookingRepository;
@@ -31,8 +39,11 @@ public class BookingServiceimpl implements BookingService {
     private UserService userService;
     @Autowired
     private CommentService commentService;
+    @Lazy
     @Autowired
     private AttachmentService attachmentService;
+    @Autowired
+    private RattingRepository ratingRepository;
     Page<BookingEntity> bookingPage =null;
     @Override
     public BookingPagination getAllAvailableBooking(int pageNo, int pageSize) {
@@ -102,7 +113,7 @@ public class BookingServiceimpl implements BookingService {
     }
 
     @Override
-    public void deleteBooking(BookingEntity bookingEntity) {
+    public void deleteBooking(BookingEntity bookingEntity) throws Exception {
         List<UserEntity> requestingUsers =  bookingEntity.getRequestingUsers();
         if(requestingUsers.size() > 0) {
             for (UserEntity user : requestingUsers) {
@@ -117,12 +128,12 @@ public class BookingServiceimpl implements BookingService {
                 userService.save(user);
             }
         }
-        List<Comment> comments = bookingEntity.getComments();
-        if(comments.size() > 0)
+        List<Comment> reviews = bookingEntity.getComments();
+        if(reviews.size() > 0)
         {
-            for(Comment comment : comments)
+            for(Comment review : reviews)
             {
-                commentService.delete(comment);
+                commentService.delete(review);
             }
         }
         List<Attachment> attachments = bookingEntity.getAttachments();
@@ -130,7 +141,7 @@ public class BookingServiceimpl implements BookingService {
         {
             for(Attachment attachment: attachments)
             {
-                attachmentService.delete(attachment);
+                attachmentService.delete(attachment.getId());
             }
         }
         bookingRepository.delete(bookingEntity);
@@ -139,6 +150,35 @@ public class BookingServiceimpl implements BookingService {
     @Override
     public List<BookingEntity> findBookingsByCompanyName(String companyName) {
         return bookingRepository.findBookingEntitiesByCompanyName(companyName);
+    }
+
+    @Override
+    public void uploadFile(MultipartFile file, Long bookingId) throws Exception {
+        BookingEntity bookingEntity = findById(bookingId);
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+
+        if(user == null || bookingEntity == null) {
+            attachmentService.opperationError();
+        }
+        if(!attachmentService.isValidFileType(file)) {
+            attachmentService.opperationError();
+        }
+
+        Attachment attachment = attachmentService.saveAttachment(file, bookingEntity, user);
+
+        String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/download/")
+                .path(String.valueOf(attachment.getId()))
+                .toUriString();
+        String viewUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/view/")
+                .path(String.valueOf(attachment.getId()))
+                .toUriString();
+
+        log.info("Download URL: " + downloadUrl);
+        log.info("View URL: " + viewUrl);
+
+        attachmentService.updateAttachmentUrls(attachment.getId(), downloadUrl, viewUrl);
     }
 
 

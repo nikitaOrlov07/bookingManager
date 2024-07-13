@@ -3,6 +3,7 @@ package com.example.bookingproject.Model.Security;
 
 import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Chat;
+import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Message;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -84,7 +85,24 @@ public class UserEntity {
     @ToString.Exclude
     @JsonIgnore
     private List<BookingEntity> authoredBookings = new ArrayList<>();
+    // Comments
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "users_liked_comments",
+            joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
+            inverseJoinColumns ={@JoinColumn(name = "comment_id", referencedColumnName = "id")}
+    )
+    private List<Comment> likedComments = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "users_disliked_comments",
+            joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
+            inverseJoinColumns ={@JoinColumn(name = "comment_id", referencedColumnName = "id")}
+    )
+    private List<Comment> dislikedComments = new ArrayList<>();
 
     // without this -> will be error in ChatController - deleteChat
     @Override

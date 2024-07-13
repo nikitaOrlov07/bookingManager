@@ -1,0 +1,58 @@
+body {
+    background-color: #f8f9fa;
+}
+.container {
+    max-width: 2750px;
+}
+.booking-card {
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin: 0 auto;
+}
+.booking-image {
+    height: 400px;
+    object-fit: cover;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.card-body {
+    padding: 2rem;
+}
+.badge {
+    font-size: 0.8rem;
+}
+.author-avatar {
+    width: 70px; /* Увеличиваем размер аватара */
+    height: 70px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.row {
+    margin-bottom: 2rem; /* Увеличиваем отступ между рядами */
+}
+h2.card-title {
+    font-size: 2.5rem; /* Увеличиваем размер заголовка */
+    margin-bottom: 1.5rem;
+}
+.card-text {
+    font-size: 1.1rem; /* Увеличиваем размер текста описания */
+    margin-bottom: 2rem;
+}
+.btn-primary {
+    font-size: 1rem; /* Увеличиваем размер кнопки */
+    padding: 0.25rem 1.25rem;
+}
+.company-banner {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.company-name {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin: 0;
+    text-align: center;
+    font-weight: 600;
+}

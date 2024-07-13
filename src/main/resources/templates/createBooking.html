@@ -37,6 +37,7 @@
                     <option value="currency">Currency*</option>
                     <option value="country">Country*</option>
                     <option value="city">City*</option>
+                    <option value="mediaFiles">Photo/Video</option>
                     <option value="address">Address*</option>
                     <option value="capacity">Capacity</option>
                     <option value="numbersOfRoom">Number of Rooms</option>
@@ -125,6 +126,14 @@
             <input type="text" class="form-control" id="numbersOfRoomInput" th:field="*{numberOfRooms}">
         </div>
 
+        <div id="mediaFiles" class="mb-3 hidden">
+            <label for="fileInput" class="form-label">Add Photo/Video</label>
+            <input type="file" class="form-control" id="fileInput" multiple accept="image/*,video/*">
+            <div id="fileList" class="mt-3" style="max-height: 200px; overflow-y: auto;">
+                <!-- Uploaded files will be displayed here -->
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Create</button>
     </form>
 </div>
@@ -142,6 +151,62 @@
                 select.value = '';
             }
         }
+    });
+
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    let files = [];
+
+    fileInput.addEventListener('change', function(event) {
+        const newFiles = Array.from(event.target.files);
+        files = files.concat(newFiles);
+        updateFileList();
+    });
+
+    function updateFileList() {
+        fileList.innerHTML = '';
+        files.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item d-flex justify-content-between align-items-center mb-2';
+            fileItem.innerHTML = `
+            <span>${file.name}</span>
+            <div>
+                <button class="btn btn-sm btn-primary view-btn" type="button">View</button>
+                <button class="btn btn-sm btn-danger delete-btn" type="button">Delete</button>
+            </div>
+        `;
+            fileList.appendChild(fileItem);
+
+            fileItem.querySelector('.view-btn').addEventListener('click', function() {
+                const url = URL.createObjectURL(file);
+                window.open(url, '_blank');
+            });
+
+            fileItem.querySelector('.delete-btn').addEventListener('click', function() {
+                files.splice(index, 1);
+                updateFileList();
+            });
+        });
+    }
+
+    document.getElementById('bookingForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        files.forEach(file => formData.append('files', file));
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = response.url;
+            } else {
+                throw new Error('Form submission failed');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+        });
     });
 </script>
 </body>
