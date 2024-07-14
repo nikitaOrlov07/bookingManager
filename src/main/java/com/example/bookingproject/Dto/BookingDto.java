@@ -35,6 +35,7 @@ import java.util.List;
 
         private String description;
         private String amenities;
+        private String conditions;
 
         @NotNull(message = "You must provide price")
         @DecimalMin(value = "0.0", inclusive = false, message = "The value must be greater than 0")

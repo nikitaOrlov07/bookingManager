@@ -32,9 +32,10 @@
                     <option value="type">Type*</option>
                     <option value="description">Description</option>
                     <option value="amenities">Amenities</option>
+                    <option value="conditions">Conditions</option>
                     <option value="price">Price*</option>
-                    <option value="bookingTime">Booking Time*</option>
                     <option value="currency">Currency*</option>
+                    <option value="bookingTime">Booking Time*</option>
                     <option value="country">Country*</option>
                     <option value="city">City*</option>
                     <option value="mediaFiles">Photo/Video</option>
@@ -72,9 +73,14 @@
             <input type="text" class="form-control" id="amenitiesInput" placeholder="List the amenities separated by commas" th:field="*{amenities}">
         </div>
 
+        <div id="conditions" class="mb-3 hidden">
+            <label for="conditionsInput" class="form-label">Conditions</label>
+            <textarea class="form-control" id="conditionsInput" th:field="*{conditions}"  placeholder="Conditions (comma-separated) " ></textarea>
+        </div>
+
         <div id="price" class="mb-3 hidden">
             <label for="priceInput" class="form-label">Price*</label>
-            <input type="number" class="form-control" id="priceInput" th:field="*{price}" step="0.01" required min="0.01">
+            <input type="number" class="form-control" id="priceInput" th:field="*{price}" step="0.01" required min="0">
             <span class="error-message" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
         </div>
 
@@ -191,14 +197,21 @@
 
     document.getElementById('bookingForm').addEventListener('submit', function(event) {
         event.preventDefault();
+        console.log('Form submitted'); // Добавьте эту строку для отладки
 
         const formData = new FormData(this);
         files.forEach(file => formData.append('files', file));
+
+
+        for (let pair of formData.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
 
         fetch(this.action, {
             method: 'POST',
             body: formData
         }).then(response => {
+            console.log('Response status:', response.status); // Добавьте эту строку
             if (response.ok) {
                 window.location.href = response.url;
             } else {

@@ -40,6 +40,11 @@
                     <input type="text" class="form-control" id="amenities" name="amenities" th:field="*{amenities}" placeholder="Amenities (comma-separated)">
                 </div>
 
+                <div id="conditions" class="mb-3 hidden">
+                    <label for="conditionsInput" class="form-label">Conditions</label>
+                    <input class="form-control" id="conditionsInput" th:field="*{conditions}" placeholder="Conditions (comma-separated) "></input>
+                </div>
+
                 <div class="form-group col-md-6 mb-3">
                     <label for="price" class="text-color">Price:</label>
                     <input type="number" class="form-control" id="price" name="price" th:field="*{price}" step="0.01" min="0.01">
@@ -89,6 +94,10 @@
                     <input type="file" class="form-control" id="fileInput" name="newFiles" multiple accept="image/*,video/*">
                 </div>
 
+                <div id="newFilesList" class="mb-3">
+                    <h5>New Files:</h5>
+                    <!-- New files will be displayed here -->
+                </div>
                 <div class="form-group mb-3">
                     <label for="companyName" class="text-color">Company Name:</label>
                     <input type="text" class="form-control" id="companyName" name="companyName" th:field="*{companyName}" placeholder="Company Name">
@@ -107,73 +116,86 @@
             <button type="submit" class="btn btn-primary" style="margin-top: 10px">Update</button>
         </form>
     </div>
-</section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const deletedFileIds = new Set();
-        const deletedFileIdsInput = document.getElementById('deletedFileIds');
-        const fileInput = document.getElementById('fileInput');
-        const existingFileList = document.getElementById('existingFileList');
-        const form = document.querySelector('form');
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-        // Function to update character count
-        function updateCharCount() {
-            const description = document.getElementById('description');
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = `${description.value.length} / 500`;
-        }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deletedFileIds = new Set();
+            const deletedFileIdsInput = document.getElementById('deletedFileIds');
+            const fileInput = document.getElementById('fileInput');
+            const existingFileList = document.getElementById('existingFileList');
+            const newFilesList = document.getElementById('newFilesList');
+            const form = document.querySelector('form');
 
-        // Initialize character count
-        updateCharCount();
+            let newFiles = [];
 
-        // Add event listener for description input
-        document.getElementById('description').addEventListener('input', updateCharCount);
-
-        // Handle deletion of existing files
-        document.querySelectorAll('.delete-file').forEach(button => {
-            button.addEventListener('click', function() {
-                const fileId = this.getAttribute('data-id');
-                deletedFileIds.add(fileId);
-                this.closest('div').style.display = 'none';
-                deletedFileIdsInput.value = Array.from(deletedFileIds).join(',');
+            // Handle deletion of existing files
+            document.querySelectorAll('.delete-file').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const fileId = this.getAttribute('data-id');
+                    deletedFileIds.add(fileId);
+                    this.closest('.mb-2').remove();
+                    deletedFileIdsInput.value = Array.from(deletedFileIds).join(',');
+                });
             });
-        });
 
-        // Handle addition of new files
-        fileInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            for (let file of files) {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'mb-2';
-                fileItem.innerHTML = `
+            // Handle addition of new files
+            fileInput.addEventListener('change', function(event) {
+                const files = Array.from(event.target.files);
+                newFiles = newFiles.concat(files);
+                updateNewFilesList();
+            });
+
+            function updateNewFilesList() {
+                newFilesList.innerHTML = '<h5>New Files:</h5>';
+                newFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'mb-2';
+                    fileItem.innerHTML = `
                 <span>${file.name}</span>
                 <button type="button" class="btn btn-sm btn-danger remove-new-file">Remove</button>
+                <button type="button" class="btn btn-sm btn-primary view-new-file">View</button>
             `;
-                existingFileList.appendChild(fileItem);
+                    newFilesList.appendChild(fileItem);
 
-                fileItem.querySelector('.remove-new-file').addEventListener('click', function() {
-                    fileItem.remove();
-                    // Remove file from fileInput
-                    const dt = new DataTransfer();
-                    const { files } = fileInput;
-                    for (let i = 0; i < files.length; i++) {
-                        const f = files[i];
-                        if (f.name !== file.name) dt.items.add(f);
-                    }
-                    fileInput.files = dt.files;
+                    fileItem.querySelector('.remove-new-file').addEventListener('click', function() {
+                        newFiles.splice(index, 1);
+                        updateNewFilesList();
+                    });
+
+                    fileItem.querySelector('.view-new-file').addEventListener('click', function() {
+                        const url = URL.createObjectURL(file);
+                        window.open(url, '_blank');
+                    });
                 });
             }
-        });
 
-        // Prevent form submission if there are no files
-        form.addEventListener('submit', function(event) {
-            if (fileInput.files.length === 0 && deletedFileIds.size === 0) {
+            form.addEventListener('submit', function(event) {
                 event.preventDefault();
-                alert('Please select at least one file to upload or delete an existing file.');
-            }
+                const formData = new FormData(this);
+
+                // Add new files to formData
+                newFiles.forEach(file => formData.append('newFiles', file));
+
+                // Send the form data
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = response.url;
+                    } else {
+                        throw new Error('Form submission failed');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            });
         });
-    });
-</script>
+    </script>
+</section>
+
 </body>
 </html>

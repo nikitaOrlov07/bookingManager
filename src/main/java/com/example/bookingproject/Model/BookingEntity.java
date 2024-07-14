@@ -33,15 +33,18 @@ public class BookingEntity {
     private  Boolean occupied; // will be false if neihborCount = capacity
     private Double rating;
     private  String companyName;
+
     // Conditions
-    // @ElementCollection
-    // private List<String> conditions;
     @ElementCollection
-    private List<String> amenities;
+    private List<String> amenities = new ArrayList<>();  // modifiable collections
+
+    @ElementCollection
+    private List<String> conditions = new ArrayList<>(); // modifiable collections
 
     // Money
     private Double price;
     private BookingTime bookingTime;
+
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
@@ -78,8 +81,4 @@ public class BookingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
-
-
-
-
 }

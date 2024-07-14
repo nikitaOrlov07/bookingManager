@@ -118,7 +118,7 @@ public class UserServiceimpl implements UserService{
                 user.getLikedComments().remove(comment);
                 userRepository.save(user);
             }
-            else if(user.getDislikedComments().contains(comment))                                          // if user disliked this news before
+            else if(user.getDislikedComments().contains(comment))  // if user disliked this news before
             {
                 // remove this news from disliked news
                 comment.setDislikes(comment.getDislikes() - 1);

@@ -21,7 +21,7 @@ public interface BookingService {
 
     BookingEntity updateBookings(BookingDto bookingDto);
 
-    void deleteBooking(BookingEntity bookingEntity) throws Exception;
+    void deleteBooking(Long bookingId) throws Exception;
 
     List<BookingEntity> findBookingsByCompanyName(String companyName);
 

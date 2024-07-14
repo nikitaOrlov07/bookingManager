@@ -20,6 +20,8 @@ public class Comment {
     private String text;
     private String pubDate;
 
+    private int rating;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private BookingEntity booking;

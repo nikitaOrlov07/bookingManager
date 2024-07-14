@@ -16,6 +16,7 @@ import com.example.bookingproject.Service.AttachmentService;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.CommentService;
 import com.example.bookingproject.Service.Security.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -108,45 +112,75 @@ public class BookingServiceimpl implements BookingService {
 
     @Override
     public BookingEntity updateBookings(BookingDto bookingDto) {
-        BookingEntity bookingEntity = findById(bookingDto.getId());
-        return  bookingRepository.save(bookingEntity);
+        BookingEntity existingBooking = findById(bookingDto.getId());
+        if (existingBooking == null) {
+            throw new EntityNotFoundException("Booking not found with id: " + bookingDto.getId());
+        }
+
+        // Update only fields , that can be changed
+        existingBooking.setTitle(bookingDto.getTitle());
+        existingBooking.setType(bookingDto.getType());
+        existingBooking.setDescription(bookingDto.getDescription());
+        // Update amenities
+        existingBooking.getAmenities().clear();
+        existingBooking.getAmenities().addAll(Arrays.asList(bookingDto.getAmenities().split(",\\s*")));
+
+        // Update conditions
+        existingBooking.getConditions().clear();
+        existingBooking.getConditions().addAll(Arrays.asList(bookingDto.getConditions().split(",\\s*")));
+        existingBooking.setPrice(bookingDto.getPrice());
+        existingBooking.setCurrency(bookingDto.getCurrency());
+        existingBooking.setBookingTime(bookingDto.getBookingTime());
+        existingBooking.setCountry(bookingDto.getCountry());
+        existingBooking.setCity(bookingDto.getCity());
+        existingBooking.setAddress(bookingDto.getAddress());
+        existingBooking.setCapacity(bookingDto.getCapacity());
+        existingBooking.setNumberOfRooms(bookingDto.getNumberOfRooms());
+        existingBooking.setCompanyName(bookingDto.getCompanyName());
+
+        return bookingRepository.save(existingBooking);
     }
 
     @Override
-    public void deleteBooking(BookingEntity bookingEntity) throws Exception {
-        List<UserEntity> requestingUsers =  bookingEntity.getRequestingUsers();
-        if(requestingUsers.size() > 0) {
-            for (UserEntity user : requestingUsers) {
-                user.getBookRequest().remove(bookingEntity);
-                userService.save(user);
-            }
+    @Transactional
+    public void deleteBooking(Long bookingId) throws Exception {
+        BookingEntity bookingEntity = findById(bookingId);
+
+        // Also i can use Iterator instead of new Arraylist to create a copy of the collection we are iterating over. This allows us to safely modify the original collection during iteration.
+        for (UserEntity user : new ArrayList<>(bookingEntity.getRequestingUsers())) {
+            user.getBookRequest().remove(bookingEntity);
+            userService.save(user);
         }
-        List<UserEntity> confirmedUsers = bookingEntity.getConfirmedUsers();
-        if(confirmedUsers.size() > 0) {
-            for (UserEntity user : confirmedUsers) {
-                user.getUserBooks().remove(bookingEntity);
-                userService.save(user);
-            }
+        bookingEntity.getRequestingUsers().clear();
+
+        for (UserEntity user : new ArrayList<>(bookingEntity.getConfirmedUsers())) {
+            user.getUserBooks().remove(bookingEntity);
+            userService.save(user);
         }
-        List<Comment> reviews = bookingEntity.getComments();
-        if(reviews.size() > 0)
-        {
-            for(Comment review : reviews)
-            {
-                commentService.delete(review);
-            }
+        bookingEntity.getConfirmedUsers().clear();
+
+        for (Comment review : new ArrayList<>(bookingEntity.getComments())) {
+            commentService.delete(review);
         }
-        List<Attachment> attachments = bookingEntity.getAttachments();
-        if(attachments.size()>0)
-        {
-            for(Attachment attachment: attachments)
-            {
+        bookingEntity.getComments().clear();
+
+        if (bookingEntity.getAttachments() != null && !bookingEntity.getAttachments().isEmpty()) {
+            List<Attachment> attachmentsToRemove = new ArrayList<>(bookingEntity.getAttachments());
+            for (Attachment attachment : attachmentsToRemove) {
                 attachmentService.delete(attachment.getId());
             }
+            bookingEntity.getAttachments().clear();
         }
+
+        bookingEntity.getAmenities().clear();
+        bookingEntity.getConditions().clear();
+
+        UserEntity author = bookingEntity.getAuthor();
+        author.getAuthoredBookings().remove(bookingEntity);
+        userService.save(author);
+
         bookingRepository.delete(bookingEntity);
     }
-
     @Override
     public List<BookingEntity> findBookingsByCompanyName(String companyName) {
         return bookingRepository.findBookingEntitiesByCompanyName(companyName);
@@ -167,11 +201,11 @@ public class BookingServiceimpl implements BookingService {
         Attachment attachment = attachmentService.saveAttachment(file, bookingEntity, user);
 
         String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/download/")
+                .path("/files/download/")
                 .path(String.valueOf(attachment.getId()))
                 .toUriString();
         String viewUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/view/")
+                .path("/files/view/")
                 .path(String.valueOf(attachment.getId()))
                 .toUriString();
 

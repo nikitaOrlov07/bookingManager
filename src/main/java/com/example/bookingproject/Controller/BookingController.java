@@ -50,7 +50,7 @@ public class BookingController {
     }
     @PostMapping("/create/save")
     public String saveBooking(@ModelAttribute("bookingDto") @Valid BookingDto bookingDto,
-                              @RequestParam("files") MultipartFile[] files,
+                              @RequestParam(value = "files" , required = false) MultipartFile[] files,
                               BindingResult result,
                               RedirectAttributes redirectAttributes,
                               Model model)
@@ -69,15 +69,18 @@ public class BookingController {
         log.info("save for create is working");
         bookingDto.setAuthor(user);
         bookingDto.setCompanyName(user.getCompanyName());
+        System.out.println(  bookingDto.getConditions());
         BookingEntity savedBooking = bookingsService.saveBooking(bookingDto);
 
         // file saving
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                try {
-                    bookingsService.uploadFile(file, savedBooking.getId());
-                } catch (Exception e) {
-                    log.error("Error uploading file", e);
+        if(files != null) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    try {
+                        bookingsService.uploadFile(file, savedBooking.getId());
+                    } catch (Exception e) {
+                        log.error("Error uploading file", e);
+                    }
                 }
             }
         }
@@ -122,7 +125,11 @@ public class BookingController {
             model.addAttribute("bookingDto",bookingDto);
             return "updateBooking";
         }
+        System.out.println(bookingDto.getConditions());
         BookingEntity savedBookingEntity = bookingsService.updateBookings(bookingDto);
+        savedBookingEntity.getConditions().forEach(System.out::println);
+
+
         // Work with files
 
         // Delete delete files
@@ -138,14 +145,14 @@ public class BookingController {
                     });
         }
 
-        // Add Added files
-        if (newFiles != null) {
+        // file saving
+        if(newFiles != null) {
             for (MultipartFile file : newFiles) {
                 if (!file.isEmpty()) {
                     try {
-                        attachmentService.saveAttachment(file, savedBookingEntity, bookingDto.getAuthor());
+                        bookingsService.uploadFile(file, savedBookingEntity.getId());
                     } catch (Exception e) {
-                       e.printStackTrace();
+                        log.error("Error uploading file", e);
                     }
                 }
             }
@@ -166,7 +173,7 @@ public class BookingController {
         if(bookingEntity == null && !bookingEntity.getAuthor().equals(user))
             return "redirect:/home?operationError";
 
-        bookingsService.deleteBooking(bookingEntity);
+        bookingsService.deleteBooking(bookingEntity.getId());
         return "redirect:/home?successDeletedBooking";
     }
 

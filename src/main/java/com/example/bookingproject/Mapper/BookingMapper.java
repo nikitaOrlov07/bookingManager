@@ -9,10 +9,14 @@ import java.util.List;
 public class BookingMapper {
     public static BookingDto getBookingDtoFromBookingEntity(BookingEntity bookingEntity)
     {
+        // Amenities
         String amenities = String.join(",", bookingEntity.getAmenities()); // write the list items to a String variable and separate them with a comma
+        // Conditions
+        String conditions = String.join(",", bookingEntity.getConditions());
         BookingDto bookingDto = BookingDto.builder()
                 .id(bookingEntity.getId())
                 .attachments(bookingEntity.getAttachments())
+                .conditions(conditions)
                 .author(bookingEntity.getAuthor())
                 .numberOfRooms(bookingEntity.getNumberOfRooms())
                 .companyName(bookingEntity.getCompanyName())
@@ -32,8 +36,13 @@ public class BookingMapper {
     }
     public static BookingEntity getBookingEntityFromBookingDto(BookingDto bookingDto)
     {
-        String[] items = bookingDto.getAmenities().split(",\\s*"); // comma with space or just comma
-        List<String>  amenities = new ArrayList<>(Arrays.asList(items));
+        // Amenities
+        String[] amenitiesItems = bookingDto.getAmenities().split(",\\s*"); // comma with space or just comma
+        List<String>  amenities = new ArrayList<>(Arrays.asList(amenitiesItems));
+        // Conditions
+        String[] conditionItems = bookingDto.getConditions().split(",\\s*"); // comma with space or just comma
+        List<String>  conditions = new ArrayList<>(Arrays.asList(conditionItems));
+
         BookingEntity bookingEntity = BookingEntity.builder()
                 .attachments(bookingDto.getAttachments())
                 .author(bookingDto.getAuthor())
@@ -47,6 +56,7 @@ public class BookingMapper {
                 .capacity(bookingDto.getCapacity())
                 .description(bookingDto.getDescription())
                 .amenities(amenities)
+                .conditions(conditions)
                 .country(bookingDto.getCountry())
                 .address(bookingDto.getAddress())
                 .city(bookingDto.getCity())
