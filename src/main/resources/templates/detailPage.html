@@ -28,6 +28,12 @@
     <div th:if="${param.successfullyUpdated}" class="alert alert-success" id="successfullyUpdated">
         Booking was successfully updated
     </div>
+    <div th:if="${param.successfullyAddRequest}" class="alert alert-success" id="successfullyAddRequest">
+        Your booking request was successfully added
+    </div>
+    <div th:if="${param.successfullyRemoveRequest}" class="alert alert-success" id="successfullyRemoveRequest">
+        Your booking request was successfully removed
+    </div>
     <div class="card booking-card">
         <div th:if="${user != null and user.companyName != null and !user.companyName.isEmpty()}" class="company-banner">
             <h3 class="company-name" th:text="${user.companyName}"></h3>
@@ -85,7 +91,7 @@
                 <span th:if="${booking == null or booking.conditions == null or booking.conditions.isEmpty() or booking.conditions.get(0).trim().isEmpty()}"
                       class="badge bg-secondary me-2">no specify</span>
             </div>
-            <!--Foto Attachment -->
+            <!-- Attachment -->
             <hr style="border: 2px solid #ccc; border-color: #032738">
             <div>
                 <h5>Attachment</h5>
@@ -96,13 +102,13 @@
                     <div th:if="${booking.attachments != null and !booking.attachments.isEmpty()}" th:each="file : ${booking.attachments}" class="col-md-6 mb-3">
                         <div class="card h-100 shadow-sm">
                             <div th:if="${file != null}">
-                                <img th:if="${file.fileType.startsWith('image/')}" th:src="${file.viewUrl}" class="card-img-top" th:alt="${file.fileName}" style="object-fit: cover; height: auto;">
+                                <img th:if="${file.fileType.startsWith('image/')}" th:src="${file.viewUrl}" class="card-img-top" th:alt="${file.fileName}" style="object-fit: cover; height: 500px;">
                                 <div class="card-body" th:unless="${file.fileType.startsWith('image/')}">
                                     <h5 class="card-title" th:text="${file.fileName}"></h5>
                                     <p class="card-text">Creator: <span th:text="${file.creator}"></span></p>
                                     <p class="card-text">Time: <small class="text-muted" th:text="${file.timestamp}"></small></p>
                                 </div>
-                                <div class="card-footer" th:if="${!file.fileType.startsWith('image/')}">
+                                <div class="card-footer">
                                     <a th:href="@{/files/view/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="width:100px; height: 35px">View</a>
                                     <a th:href="@{/files/download/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="width:100px; height: 35px">Download</a>
                                 </div>
@@ -247,7 +253,15 @@
                 // Initialize char count on page load
                 updateCharCount();
             </script>
-            <a href="#" class="btn btn-primary">Book Now</a>
+            <th:block th:if="${user!=null}">
+
+            <form method="post" style="margin: 10px;" th:if="${!user.getBookRequest().contains(booking)}" th:action="@{/bookings/book/add/{bookingId}(bookingId=${bookingId})}">
+                <button class="btn btn-primary">Add booking request</button>
+            </form>
+            <form method="post" th:if="${user.getBookRequest().contains(booking)}" th:action="@{/bookings/book/remove/{bookingId}(bookingId=${bookingId})}">
+                <button class="btn btn-primary">Remove booking request</button>
+            </form>
+            </th:block>
         </div>
     </div>
 </div>
@@ -259,6 +273,8 @@
     $(document).ready(function() {
         hideAlert('bookingCreationSuccess');
         hideAlert('successfullyUpdated');
+        hideAlert('successfullyRemoveRequest')
+        hideAlert('successfullyAddRequest')
     });
 </script>
 </body>

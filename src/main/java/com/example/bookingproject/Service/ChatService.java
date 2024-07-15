@@ -17,4 +17,5 @@ public interface ChatService {
 
     void delete(Chat chat);
 
+    List<Chat> findChatByUser(UserEntity user);
 }

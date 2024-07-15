@@ -47,6 +47,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-left">
                 <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/configuration}">Configuration</a></li>
                 <li sec:authorize="!isAuthenticated()" class="nav-item"><a class="nav-link" th:href="@{/login}">Login</a></li>
             </ul>
         </div>

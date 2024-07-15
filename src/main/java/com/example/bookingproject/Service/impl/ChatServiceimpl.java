@@ -105,5 +105,10 @@ public class ChatServiceimpl implements ChatService {
         chatRepository.delete(chat);
     }
 
+    @Override
+    public List<Chat> findChatByUser(UserEntity user) {
+        return chatRepository.findByParticipantsContains(user);
+    }
+
 
 }

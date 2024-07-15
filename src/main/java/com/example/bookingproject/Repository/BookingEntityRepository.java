@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingEntityRepository extends JpaRepository<BookingEntity,Long> {
 
@@ -35,4 +36,6 @@ public interface BookingEntityRepository extends JpaRepository<BookingEntity,Lon
     );
     List<BookingEntity> findBookingEntitiesByCompanyName(String companyName);
 
+    List<BookingEntity> findAllByOrderByIdAsc();
+    Optional<BookingEntity> findByTitle(String title);
 }

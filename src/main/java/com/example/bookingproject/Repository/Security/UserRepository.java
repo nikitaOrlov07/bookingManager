@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
     List<UserEntity> findAllByLikedComments(Comment comment);
     List<UserEntity> findAllByDislikedComments(Comment comment);
 
+    @Query("SELECT u FROM UserEntity u WHERE SIZE(u.authoredBookings) > 0")
+    List<UserEntity> findAllUsersWithAuthoredBookings();
+
 }

@@ -1,6 +1,8 @@
 package com.example.bookingproject.Service.Security;
 
+import com.example.bookingproject.Dto.BookingRequestDto;
 import com.example.bookingproject.Dto.security.RegistrationDto;
+import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Comment;
 
 import com.example.bookingproject.Model.Security.RoleEntity;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -158,6 +161,44 @@ public class UserServiceimpl implements UserService{
                 userRepository.save(user);
             }
         }
+    }
+
+    @Override
+    public List<BookingRequestDto> findUserBookingsWithRequests(UserEntity user) {
+        List<BookingRequestDto> result = new ArrayList<>();
+
+        for (BookingEntity booking : user.getAuthoredBookings()) {
+            for (UserEntity requester : booking.getRequestingUsers()) {
+                BookingRequestDto dto = new BookingRequestDto(
+                        booking.getTitle(),
+                        requester.getUsername()
+                );
+                result.add(dto);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<BookingRequestDto> findUserConfirmsBookings(UserEntity user) {
+        List<BookingRequestDto> result = new ArrayList<>();
+        for(BookingEntity booking:user.getAuthoredBookings())
+        {
+            for (UserEntity confirmedUser : booking.getConfirmedUsers()) {
+                BookingRequestDto dto = new BookingRequestDto(
+                        booking.getTitle(),
+                        confirmedUser.getUsername()
+                );
+                result.add(dto);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<UserEntity> findAllBookingsCreators() {
+        return userRepository.findAllUsersWithAuthoredBookings();
     }
 
 }

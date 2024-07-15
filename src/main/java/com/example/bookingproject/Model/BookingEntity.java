@@ -9,7 +9,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -25,6 +27,7 @@ public class BookingEntity {
     private Long id;
 
     private String title;
+
     @Enumerated(EnumType.STRING)
     private BookingType type;
 
@@ -34,10 +37,10 @@ public class BookingEntity {
     private Double rating;
     private  String companyName;
 
-    // Conditions
+    // Amenities
     @ElementCollection
     private List<String> amenities = new ArrayList<>();  // modifiable collections
-
+    // Conditions
     @ElementCollection
     private List<String> conditions = new ArrayList<>(); // modifiable collections
 
@@ -53,25 +56,50 @@ public class BookingEntity {
     private String city;
     private String address;
 
-    // amount
+    // Amount
     private int neighborCount; // will increase , when users book
     private int capacity;
     private int numberOfRooms;
 
 
     // Users
-    @ManyToMany(mappedBy = "userBooks")
-    private List<UserEntity> confirmedUsers = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "booking_confirmed_users",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> confirmedUsers = new HashSet<>();
 
-    @ManyToMany(mappedBy = "bookRequest")
-    private List<UserEntity> requestingUsers = new ArrayList<>(); // те которые заплатили
+    @ManyToMany
+    @JoinTable(
+            name = "booking_requesting_users",
+            joinColumns = @JoinColumn(name = "booking_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<UserEntity> requestingUsers = new HashSet<>();
 
+    public void removeRequestingUser(UserEntity user) {
+        requestingUsers.remove(user);
+        user.getBookRequest().remove(this);
+    }
+
+    public void addConfirmedUser(UserEntity user) {
+        confirmedUsers.add(user);
+        user.getUserBooks().add(this);
+    }
+
+    public void removeConfirmedUser(UserEntity user) {
+        confirmedUsers.remove(user);
+        user.getUserBooks().remove(this);
+
+    }
     // Comments For BookingEntity
     @ToString.Exclude
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    // Attachments (fotos ,videos)
+    // Attachments
     @OneToMany(mappedBy = "booking", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonManagedReference
@@ -81,4 +109,5 @@ public class BookingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
+
 }

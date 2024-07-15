@@ -6,7 +6,6 @@ import com.example.bookingproject.Dto.BookingPagination;
 import com.example.bookingproject.Mapper.BookingMapper;
 import com.example.bookingproject.Model.Attachment;
 import com.example.bookingproject.Model.BookingEntity;
-import com.example.bookingproject.Model.Rating;
 import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Repository.BookingEntityRepository;
@@ -31,7 +30,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -49,6 +47,7 @@ public class BookingServiceimpl implements BookingService {
     @Autowired
     private RattingRepository ratingRepository;
     Page<BookingEntity> bookingPage =null;
+    @Transactional
     @Override
     public BookingPagination getAllAvailableBooking(int pageNo, int pageSize) {
 
@@ -98,18 +97,18 @@ public class BookingServiceimpl implements BookingService {
                 .build();
         return bookingPagination;
     }
-
+    @Transactional
     @Override
     public BookingEntity findById(Long bookingId) {
         return bookingRepository.findById(bookingId).orElse(null);
     }
-
+    @Transactional
     @Override
     public BookingEntity saveBooking(BookingDto bookingDto) {
         BookingEntity bookingEntity = BookingMapper.getBookingEntityFromBookingDto(bookingDto);
         return bookingRepository.save(bookingEntity);
     }
-
+    @Transactional
     @Override
     public BookingEntity updateBookings(BookingDto bookingDto) {
         BookingEntity existingBooking = findById(bookingDto.getId());
@@ -181,11 +180,13 @@ public class BookingServiceimpl implements BookingService {
 
         bookingRepository.delete(bookingEntity);
     }
+    @Transactional
     @Override
     public List<BookingEntity> findBookingsByCompanyName(String companyName) {
         return bookingRepository.findBookingEntitiesByCompanyName(companyName);
     }
 
+    @Transactional
     @Override
     public void uploadFile(MultipartFile file, Long bookingId) throws Exception {
         BookingEntity bookingEntity = findById(bookingId);
@@ -215,5 +216,20 @@ public class BookingServiceimpl implements BookingService {
         attachmentService.updateAttachmentUrls(attachment.getId(), downloadUrl, viewUrl);
     }
 
+    @Transactional
+    @Override
+    public List<BookingEntity> findAllBookings() {
+        return  bookingRepository.findAllByOrderByIdAsc();
+    }
+
+    @Override
+    public BookingEntity findByTitle(String bookingTitle) {
+        return bookingRepository.findByTitle(bookingTitle).orElse(null);
+    }
+    @Override
+    public BookingEntity save(BookingEntity bookingEntity)
+   {
+    return bookingRepository.save(bookingEntity);
+   }
 
 }

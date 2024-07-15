@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
-      layout:decorate="~{layout}">
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+      layout:decorate="~{layout}"
+      lang="en"
+>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -133,8 +133,8 @@
         </div>
 
         <div id="mediaFiles" class="mb-3 hidden">
-            <label for="fileInput" class="form-label">Add Photo/Video</label>
-            <input type="file" class="form-control" id="fileInput" multiple accept="image/*,video/*">
+            <label for="fileInput" class="form-label">Add attachment:</label>
+            <input type="file" class="form-control" id="fileInput" multiple>
             <div id="fileList" class="mt-3" style="max-height: 200px; overflow-y: auto;">
                 <!-- Uploaded files will be displayed here -->
             </div>

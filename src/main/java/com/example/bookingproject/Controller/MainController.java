@@ -2,10 +2,13 @@ package com.example.bookingproject.Controller;
 
 import com.example.bookingproject.Config.BookingType;
 import com.example.bookingproject.Dto.BookingPagination;
+import com.example.bookingproject.Dto.BookingRequestDto;
 import com.example.bookingproject.Model.BookingEntity;
+import com.example.bookingproject.Model.Chat;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.BookingService;
+import com.example.bookingproject.Service.ChatService;
 import com.example.bookingproject.Service.Security.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +17,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @Slf4j
 public class MainController {
     private BookingService bookingService;
     private UserService userService;
+    private ChatService chatService;
     @Autowired
-    public MainController(BookingService bookingService,UserService userService) {
+    public MainController(BookingService bookingService,UserService userService,ChatService chatService) {
         this.bookingService = bookingService;
         this.userService = userService;
+        this.chatService = chatService;
     }
 
     @GetMapping("/home")
@@ -77,5 +85,50 @@ public class MainController {
         model.addAttribute("companyBookingEntities",companyBookingEntities);
         model.addAttribute("user",user);
         return "detailPage";
+    }
+    @GetMapping("/configuration")
+    public String getConfigurationPage(Model model, RedirectAttributes redirectAttributes) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
+            return "redirect:/login";
+        }
+
+        // For Bookings Creator
+        if (user.getAuthoredBookings().size() > 0) {
+            List<BookingRequestDto> bookingRequestsList = userService.findUserBookingsWithRequests(user);
+            model.addAttribute("bookingRequests", bookingRequestsList);
+            if(bookingRequestsList == null)
+                log.error("Error is null");
+            if(bookingRequestsList.isEmpty())
+                log.error("Error is empty");
+            bookingRequestsList.forEach(System.out::println);
+            List<Chat> userExistingChats = chatService.findChatByUser(user);
+            model.addAttribute("userExistingChats", userExistingChats);
+            bookingRequestsList.forEach(System.out::println);
+            List<BookingRequestDto> bookingConfirmedList = userService.findUserConfirmsBookings(user);
+            model.addAttribute("bookingConfirmed", bookingConfirmedList);
+            bookingRequestsList.forEach(System.out::println);
+        }
+        // For Admin
+        if (user.hasAdminRole())
+        {
+            List<UserEntity> bookingsCreatorsList = userService.findAllBookingsCreators();
+            model.addAttribute("bookingsCreators", bookingsCreatorsList);
+
+            List<UserEntity> allUserLists = userService.findAllUsers();
+            model.addAttribute("allUsers", allUserLists);
+
+            List<BookingEntity> bookingEntities = bookingService.findAllBookings();
+            model.addAttribute("bookingsEntities", bookingEntities);
+        }
+        // For all users
+        Set<BookingEntity> userConfirmedBooking = user.getUserBooks();
+        Set<BookingEntity> userBookingRequest= user.getBookRequest();
+
+        model.addAttribute("userConfirmedBooks",userConfirmedBooking.stream().toList());
+        model.addAttribute("userBookingRequest",userBookingRequest.stream().toList());
+        model.addAttribute("currentUser", user);
+     return "configurationPage";
     }
 }

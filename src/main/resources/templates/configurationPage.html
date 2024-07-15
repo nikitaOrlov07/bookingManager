@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns="http://www.w3.org/1999/html"
+      layout:decorate="~{layout}"
+      lang="en"
+>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .profile-section {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body layout:fragment="body" >
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Configuration Page</h1>
+
+    <!-- User Profile Section -->
+    <div class="profile-section">
+        <h2 class="section-title">User Profile</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Username:</strong> <span th:text="${currentUser.username != null and !currentUser.username.isEmpty() ? currentUser.username : 'Not specified'}"></span></p>
+                <p><strong>Email:</strong> <span th:text="${currentUser.email != null and !currentUser.email.isEmpty() ? currentUser.email : 'Not specified'}"></span></p>
+                <p><strong>Town:</strong> <span th:text="${currentUser.town != null and !currentUser.town.isEmpty() ? currentUser.town : 'Not specified'}"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Phone Number:</strong> <span th:text="${currentUser.phoneNumber != null ? currentUser.phoneNumber : 'Not specified'}"></span></p>
+                <p><strong>Company Name:</strong> <span th:text="${currentUser.companyName != null and !currentUser.companyName.isEmpty() ? currentUser.companyName : 'Not specified'}"></span></p>
+                <p><strong>Creation Date:</strong> <span th:text="${currentUser.creationDate != null and !currentUser.creationDate.isEmpty() ? currentUser.creationDate : 'Not specified'}"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings Creator Section -->
+    <div th:if="${currentUser.authoredBookings.size() > 0}" class="profile-section">
+        <h2 class="section-title">Bookings Creator</h2>
+        <div class="mb-4">
+            <h3>Booking Requests</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingRequests}">
+                    <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
+                    <div>
+                        <form method="post" th:action="@{/configuration/confirmRequest}" class="d-inline">
+                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
+                            <input type="hidden" name="username" th:value="${request.username}"/>
+                            <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+                        </form>
+                        <form method="post" th:action="@{/configuration/rejectRequest}" class="d-inline">
+                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                            <input type="hidden" name="username" th:value="${request.username}"/>
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="mb-4">
+            <h3>Existing Chats</h3>
+            <ul class="list-group">
+                <li class="list-group-item" th:each="chat : ${userExistingChats}" ></li>
+            </ul>
+        </div>
+        <div>
+            <h3>Confirmed Bookings</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingConfirmed}">
+                    <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
+                    <div>
+                        <form method="post" th:action="@{/configuration/deleteConfirm}" class="d-inline">
+                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                            <input type="hidden" name="username" th:value="${request.username}"/>
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Admin Section -->
+    <div th:if="${currentUser.hasAdminRole()}" class="profile-section">
+        <h2 class="section-title">Admin Panel</h2>
+        <div class="mb-4">
+            <h3>Bookings Creators</h3>
+            <ul class="list-group">
+                <li class="list-group-item" th:each="creator : ${bookingsCreators}" th:text="${creator.username}"></li>
+            </ul>
+        </div>
+        <div class="mb-4">
+            <h3>All Users</h3>
+            <ul class="list-group">
+                <li class="list-group-item" th:each="user : ${allUsers}" th:text="${user.username}"></li>
+            </ul>
+        </div>
+        <div>
+            <h3>All Bookings</h3>
+            <ul class="list-group">
+                <li class="list-group-item" th:each="booking : ${bookingsEntities}" th:text="${booking.title}"></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- User Bookings Section -->
+    <div class="profile-section">
+        <h2 class="section-title">Your Bookings</h2>
+        <div class="mb-4">
+            <h3>Confirmed Bookings</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${userConfirmedBooks}">
+                    <div>
+                        <h5 th:text="${booking.title}"></h5>
+                        <p class="mb-0">
+                            <span th:text="${booking.city}"></span>,
+                            <span th:text="${booking.address}"></span>,
+                            <span th:text="${booking.country}"></span>
+                        </p>
+                    </div>
+                    <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-primary btn-sm">Detail</a>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <h3>Booking Requests</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${userBookingRequest}">
+                    <div>
+                        <h5 th:text="${request.title}"></h5>
+                        <p class="mb-0">
+                            <span th:text="${request.city}"></span>,
+                            <span th:text="${request.address}"></span>,
+                            <span th:text="${request.country}"></span>
+                        </p>
+                    </div>
+                    <a th:href="@{/bookings/{id}(id=${request.id})}" class="btn btn-primary btn-sm">Detail</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

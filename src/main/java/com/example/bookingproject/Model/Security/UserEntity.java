@@ -10,9 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Data
@@ -58,24 +56,26 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)  // one user --> many comments in comment side i have @ ManyToone annotation
     private List<Message> messages = new ArrayList<>();
     // user confirmed books
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_books",
-            joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
-            inverseJoinColumns ={@JoinColumn(name = "friend_user_id", referencedColumnName = "id")}
-    )
-    private List<BookingEntity> userBooks = new ArrayList<>();
-    // user book request
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "book_request",
-            joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
-            inverseJoinColumns ={@JoinColumn(name = "book_id", referencedColumnName = "id")}
-    )
-    private List<BookingEntity> bookRequest  = new ArrayList<>();
+    @ManyToMany(mappedBy = "confirmedUsers")
+    private Set<BookingEntity> userBooks = new HashSet<>();
 
+    @ManyToMany(mappedBy = "requestingUsers")
+    private Set<BookingEntity> bookRequest = new HashSet<>();
+
+    public void addBookRequest(BookingEntity booking) {
+        bookRequest.add(booking);
+        booking.getRequestingUsers().add(this);
+    }
+
+    public void removeBookRequest(BookingEntity booking) {
+        bookRequest.remove(booking);
+        booking.getRequestingUsers().remove(this);
+    }
+
+    public void addConfirmedBook(BookingEntity booking) {
+        userBooks.add(booking);
+        booking.getConfirmedUsers().add(this);
+    }
     @JsonIgnore
     @ManyToMany(mappedBy = "participants", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE , CascadeType.REFRESH})
     private List<Chat> chats = new ArrayList<>();

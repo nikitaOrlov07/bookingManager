@@ -26,4 +26,10 @@ public interface BookingService {
     List<BookingEntity> findBookingsByCompanyName(String companyName);
 
     void uploadFile(MultipartFile file, Long id) throws Exception;
+
+    List<BookingEntity> findAllBookings();
+
+    BookingEntity findByTitle(String bookingTitle);
+
+    BookingEntity save(BookingEntity bookingEntity);
 }

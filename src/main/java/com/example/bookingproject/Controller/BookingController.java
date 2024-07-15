@@ -8,16 +8,21 @@ import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.AttachmentService;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.Security.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Arrays;
 
 @Controller
@@ -175,6 +180,55 @@ public class BookingController {
 
         bookingsService.deleteBooking(bookingEntity.getId());
         return "redirect:/home?successDeletedBooking";
+    }
+    // ------------------------------------------------------- Booking Management --------------------------------------------
+    // Add booking request
+    @Transactional
+    @PostMapping("/book/add/{bookingId}")
+    public ResponseEntity<?> addBookingRequest(@PathVariable("bookingId") Long bookingId) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        BookingEntity bookingEntity = bookingsService.findById(bookingId);
+
+        if (user == null || bookingEntity == null) {
+            return ResponseEntity.badRequest().body("User or booking not found");
+        }
+
+        user.addBookRequest(bookingEntity);
+        userService.save(user);
+        log.info("Booking request added for user {} and booking {}", user.getUsername(), bookingId);
+        String redirectUrl = "/bookings/"+bookingId;
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(redirectUrl)
+                .queryParam("successfullyAddRequest") // add success query param
+                .build()
+                .toUri();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(location)
+                .build();
+    }
+    // remove booking Request
+    @Transactional
+    @PostMapping("/book/remove/{bookingId}")
+    public ResponseEntity<?> removeBookingRequest(@PathVariable("bookingId") Long bookingId) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        BookingEntity bookingEntity = bookingsService.findById(bookingId);
+
+        if (user == null || bookingEntity == null) {
+            return ResponseEntity.badRequest().body("User or booking not found");
+        }
+
+        user.removeBookRequest(bookingEntity);
+        userService.save(user);
+        log.info("Booking request removed for user {} and booking {}", user.getUsername(), bookingId);
+        String redirectUrl = "/bookings/"+bookingId;
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(redirectUrl)
+                .queryParam("successfullyRemoveRequest") // add success query param
+                .build()
+                .toUri();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(location)
+                .build();
     }
 
 }
