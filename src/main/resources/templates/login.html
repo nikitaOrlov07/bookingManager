@@ -67,6 +67,9 @@
             <div th:if="${loginError}" class="alert alert-info">
                 <span th:text="${loginError}"></span>
             </div>
+            <div class="alert alert-success" th:if="${param.deleteUserSuccess}">
+                Your account was successfully deleted
+            </div>
             <div class="login-form">
                 <form role = "form" method="post" th:action="@{/login}">
                     <div class="form-group">

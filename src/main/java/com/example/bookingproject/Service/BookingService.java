@@ -4,7 +4,7 @@ import com.example.bookingproject.Config.BookingType;
 import com.example.bookingproject.Dto.BookingDto;
 import com.example.bookingproject.Dto.BookingPagination;
 import com.example.bookingproject.Model.BookingEntity;
-import com.example.bookingproject.Model.Security.UserEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -32,4 +32,8 @@ public interface BookingService {
     BookingEntity findByTitle(String bookingTitle);
 
     BookingEntity save(BookingEntity bookingEntity);
+
+    ResponseEntity<Object> redirect(String redirectUrl, String param);
+
+    void updateBookingRating(BookingEntity booking);
 }

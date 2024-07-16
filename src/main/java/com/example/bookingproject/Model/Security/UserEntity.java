@@ -31,9 +31,11 @@ public class UserEntity {
     private int roleId; // {0,1}
     private String creationDate;
     private String companyName;
+    private Boolean verified = false;
 
 
     @ToString.Exclude
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER , cascade = CascadeType.ALL)
     @JoinTable(
             name = "users_role",joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
@@ -57,25 +59,23 @@ public class UserEntity {
     private List<Message> messages = new ArrayList<>();
     // user confirmed books
     @ManyToMany(mappedBy = "confirmedUsers")
-    private Set<BookingEntity> userBooks = new HashSet<>();
+    @JsonIgnore
+    private Set<BookingEntity> confirmedBookings = new HashSet<>();
 
     @ManyToMany(mappedBy = "requestingUsers")
-    private Set<BookingEntity> bookRequest = new HashSet<>();
+    @JsonIgnore
+    private Set<BookingEntity> requestingBookings = new HashSet<>();
 
     public void addBookRequest(BookingEntity booking) {
-        bookRequest.add(booking);
+        requestingBookings.add(booking);
         booking.getRequestingUsers().add(this);
     }
 
     public void removeBookRequest(BookingEntity booking) {
-        bookRequest.remove(booking);
+        requestingBookings.remove(booking);
         booking.getRequestingUsers().remove(this);
     }
 
-    public void addConfirmedBook(BookingEntity booking) {
-        userBooks.add(booking);
-        booking.getConfirmedUsers().add(this);
-    }
     @JsonIgnore
     @ManyToMany(mappedBy = "participants", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE , CascadeType.REFRESH})
     private List<Chat> chats = new ArrayList<>();

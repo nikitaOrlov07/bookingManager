@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -45,11 +44,11 @@ public class ConfigurationController {
 
 
         if (bookingEntity == null || user == null) {
-            return ResponseEntity.badRequest().body("Booking or user not found");
+            bookingService.redirect("/home","operationError");
         }
 
         if (!bookingEntity.getRequestingUsers().contains(user)) {
-            return ResponseEntity.badRequest().body("User has not requested this booking");
+            bookingService.redirect("/home","operationError");
         }
 
         bookingEntity.removeRequestingUser(user);
@@ -79,11 +78,11 @@ public class ConfigurationController {
 
 
         if (bookingEntity == null || user == null) {
-            return ResponseEntity.badRequest().body("Booking or user not found");
+            bookingService.redirect("/home","operationError");
         }
 
         if (!bookingEntity.getRequestingUsers().contains(user)) {
-            return ResponseEntity.badRequest().body("User has not requested this booking");
+            bookingService.redirect("/home","operationError");
         }
 
         bookingEntity.removeRequestingUser(user);
@@ -111,11 +110,11 @@ public class ConfigurationController {
 
 
         if (bookingEntity == null || user == null) {
-            return ResponseEntity.badRequest().body("Booking or user not found");
+            bookingService.redirect("/home","operationError");
         }
 
         if (bookingEntity.getRequestingUsers().contains(user)) {
-            return ResponseEntity.badRequest().body("User has not requested this booking");
+            bookingService.redirect("/home","operationError");
         }
 
         bookingEntity.removeConfirmedUser(user);
@@ -131,5 +130,19 @@ public class ConfigurationController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(location)
                 .build();
+    }
+    // verify admin logic
+    @PostMapping("users/verify")
+    public ResponseEntity<?> verifyUser(@RequestParam("userId") Long userId)
+    {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+
+        if(currentUser == null || !currentUser.hasAdminRole())
+        {
+         bookingService.redirect("/home","operationError");
+        }
+        userService.verifyUser(userId);
+
+        return  bookingService.redirect("/configuration",null);
     }
 }

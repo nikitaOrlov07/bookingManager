@@ -175,10 +175,14 @@ public class BookingController {
             redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
             return "redirect:/login";
         }
-        if(bookingEntity == null && !bookingEntity.getAuthor().equals(user))
+        if(bookingEntity == null || (!bookingEntity.getAuthor().equals(user) && !user.hasAdminRole()) )
             return "redirect:/home?operationError";
 
         bookingsService.deleteBooking(bookingEntity.getId());
+        if(user.hasAdminRole())
+        {
+            return "redirect:/configuration";
+        }
         return "redirect:/home?successDeletedBooking";
     }
     // ------------------------------------------------------- Booking Management --------------------------------------------

@@ -37,4 +37,7 @@ public interface UserService {
     List<UserEntity> findAllBookingsCreators();
 
 
+    void deleteUser(Long userId) throws Exception;
+
+    void verifyUser(Long userId);
 }

@@ -42,9 +42,15 @@
             <h2 class="card-title" th:text="${booking.title}">Booking Title</h2>
             <div style="margin-top: 20px;">
                 <form th:if="${user != null and booking != null and
-((booking.getAuthor() != null and booking.getAuthor().equals(user)) or
- (booking.companyName != null and user.companyName != null and booking.companyName.equals(user.companyName)))}" method="post"
-                      th:action="@{delete/{bookingId}(bookingId=${booking.id})}" style="display: inline-block; margin-right: 10px" onsubmit="return confirm('Are you sure you want to delete this booking?');">
+    (
+        (booking.getAuthor() != null and booking.getAuthor().equals(user)) or
+        (booking.companyName != null or  (user.companyName != null and booking.companyName.equals(user.companyName))) or
+        user.hasAdminRole == true
+    )}"
+                      method="post"
+                      th:action="@{delete/{bookingId}(bookingId=${booking.id})}"
+                      style="display: inline-block; margin-right: 10px"
+                      onsubmit="return confirm('Are you sure you want to delete this booking?');">
                     <button class="btn btn-primary">Delete</button>
                 </form>
                 <a th:if="${user != null and (booking.getAuthor().equals(user) or booking.companyName.equals(user.companyName))}" th:href="@{update/{bookingId}(bookingId=${booking.getId()})}" class="btn btn-primary" style="display: inline-block; margin-right: 10px">Update</a>
@@ -65,6 +71,16 @@
                     <p><i class="fas fa-home"></i> <span th:text="${booking.neighborCount != null ? booking.neighborCount + ' neighbors' : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-key"></i> Status: <span th:text="${booking.occupied != null ? (booking.occupied ? 'Occupied' : 'Available') : 'no specify'}"
                                                                 th:class="${booking.occupied != null ? (booking.occupied ? 'text-danger' : 'text-success') : ''}">no specify</span></p>
+                    <p>
+                        <i class="fas fa-star"></i> Rating:
+                        <span th:if="${booking.rating != null}">
+                <span th:each="i : ${#numbers.sequence(1, 5)}">
+                    <i th:class="${i <= booking.rating ? 'fas fa-star text-warning' : 'far fa-star'}"></i>
+                </span>
+                <span th:text="${#numbers.formatDecimal(booking.rating, 1, 1)} + ' / 5'"></span>
+            </span>
+                        <span th:if="${booking.rating == null}">No rating</span>
+                    </p>
                 </div>
             </div>
 
@@ -123,9 +139,10 @@
                 <div class="d-flex align-items-center">
                     <img src="https://via.placeholder.com/50" alt="Host Avatar" class="author-avatar me-3">
                     <div>
-                        <h6 th:text="${booking.author.username}">Host Name</h6>
+                        <h6 th:if="${user == null or !user.equals(booking.getAuthor())}" th:text="${booking.author.username}">Host Name</h6>
+                        <h6 th:if="${user != null and user.equals(booking.getAuthor())}">You</h6>
                         <p class="text-muted mb-0" th:text="${'Joined ' + booking.author.creationDate}"></p>
-                        <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${booking.getAuthor().getId()})}">Chat</a>
+                        <a th:if="${user != null and !user.equals(booking.getAuthor())}" th:href="@{/chat/findOrCreate/{secondId}(secondId=${booking.getAuthor().getId()})}">Chat</a>
                     </div>
                 </div>
             </div>
@@ -253,12 +270,11 @@
                 // Initialize char count on page load
                 updateCharCount();
             </script>
-            <th:block th:if="${user!=null}">
-
-            <form method="post" style="margin: 10px;" th:if="${!user.getBookRequest().contains(booking)}" th:action="@{/bookings/book/add/{bookingId}(bookingId=${bookingId})}">
+            <th:block th:if="${user!=null and !user.equals(booking.author)}">
+            <form method="post" style="margin: 10px;" th:if="${!user.getRequestingBookings().contains(booking)}" th:action="@{/bookings/book/add/{bookingId}(bookingId=${bookingId})}">
                 <button class="btn btn-primary">Add booking request</button>
             </form>
-            <form method="post" th:if="${user.getBookRequest().contains(booking)}" th:action="@{/bookings/book/remove/{bookingId}(bookingId=${bookingId})}">
+            <form method="post" th:if="${user.getRequestingBookings().contains(booking)}" th:action="@{/bookings/book/remove/{bookingId}(bookingId=${bookingId})}">
                 <button class="btn btn-primary">Remove booking request</button>
             </form>
             </th:block>

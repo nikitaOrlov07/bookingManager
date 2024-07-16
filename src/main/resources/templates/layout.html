@@ -54,7 +54,6 @@
 
     </div>
     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-        <li sec:authorize="isAuthenticated()" class="nav-item" style="margin-right: 10px"> <a  class="nav-link" th:href="@{/bookings/create}">Create booking</a></li>
         <li sec:authorize="isAuthenticated()" class="nav-item"><a class="nav-link me-3  btn-primary" th:href="@{/logout}" style="color: white; text-decoration: none; background: darkblue; padding: 10px 20px; font-size: 18px; border-radius: 5px; box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); margin-left: auto;">Logout</a></li>
     </ul>
 </nav>

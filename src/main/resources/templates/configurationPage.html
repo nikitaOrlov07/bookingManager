@@ -21,6 +21,10 @@
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
+        .scrollable-section {
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body layout:fragment="body" >
@@ -41,52 +45,54 @@
                 <p><strong>Company Name:</strong> <span th:text="${currentUser.companyName != null and !currentUser.companyName.isEmpty() ? currentUser.companyName : 'Not specified'}"></span></p>
                 <p><strong>Creation Date:</strong> <span th:text="${currentUser.creationDate != null and !currentUser.creationDate.isEmpty() ? currentUser.creationDate : 'Not specified'}"></span></p>
             </div>
+            <form method="post" th:action="@{users/delete/{userId}(userId=${currentUser.id})}" >
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to your account?');">Delete</button>
+            </form>
+            <a  style="width: auto; margin:auto" class="btn btn-info btn-sm" th:href="@{/bookings/create}">Create new Booking Entity</a>
         </div>
     </div>
 
     <!-- Bookings Creator Section -->
     <div th:if="${currentUser.authoredBookings.size() > 0}" class="profile-section">
-        <h2 class="section-title">Bookings Creator</h2>
+        <h2 class="section-title">Bookings , that was created by you:</h2>
         <div class="mb-4">
             <h3>Booking Requests</h3>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingRequests}">
-                    <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
-                    <div>
-                        <form method="post" th:action="@{/configuration/confirmRequest}" class="d-inline">
-                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
-                            <input type="hidden" name="username" th:value="${request.username}"/>
-                            <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
-                        </form>
-                        <form method="post" th:action="@{/configuration/rejectRequest}" class="d-inline">
-                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
-                            <input type="hidden" name="username" th:value="${request.username}"/>
-                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                        </form>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <div class="mb-4">
-            <h3>Existing Chats</h3>
-            <ul class="list-group">
-                <li class="list-group-item" th:each="chat : ${userExistingChats}" ></li>
-            </ul>
+            <div class="scrollable-section">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingRequests}">
+                        <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
+                        <div>
+                            <form method="post" th:action="@{/configuration/confirmRequest}" class="d-inline">
+                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
+                                <input type="hidden" name="username" th:value="${request.username}"/>
+                                <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+                            </form>
+                            <form method="post" th:action="@{/configuration/rejectRequest}" class="d-inline">
+                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                                <input type="hidden" name="username" th:value="${request.username}"/>
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div>
             <h3>Confirmed Bookings</h3>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingConfirmed}">
-                    <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
-                    <div>
-                        <form method="post" th:action="@{/configuration/deleteConfirm}" class="d-inline">
-                            <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
-                            <input type="hidden" name="username" th:value="${request.username}"/>
-                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                        </form>
-                    </div>
-                </li>
-            </ul>
+            <div class="scrollable-section">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingConfirmed}">
+                        <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
+                        <div>
+                            <form method="post" th:action="@{/configuration/deleteConfirm}" class="d-inline">
+                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                                <input type="hidden" name="username" th:value="${request.username}"/>
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -95,21 +101,81 @@
         <h2 class="section-title">Admin Panel</h2>
         <div class="mb-4">
             <h3>Bookings Creators</h3>
-            <ul class="list-group">
-                <li class="list-group-item" th:each="creator : ${bookingsCreators}" th:text="${creator.username}"></li>
-            </ul>
+            <div class="scrollable-section">
+                <div th:if="${bookingsCreators == null or bookingsCreators.isEmpty()}">
+                    There are no booking creators
+                </div>
+                <ul class="list-group" th:if="${bookingsCreators != null and !bookingsCreators.isEmpty()}">
+                    <li class="list-group-item" th:each="creator : ${bookingsCreators}">
+                        <h5 th:text="${creator.username}"></h5>
+                        <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${creator.id})}" class="btn btn-primary btn-sm">Chat</a>
+                        <ul class="list-group mt-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${creator.authoredBookings}">
+                                <span th:text="${booking.title}"></span>
+                                <div>
+                                    <a th:href="@{/bookings/{bookingId}(bookingId=${booking.id})}" class="btn btn-info btn-sm">Detail</a>
+                                    <form th:action="@{/bookings/delete/{bookingId}(bookingId=${booking.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                    </form>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="mb-4">
             <h3>All Users</h3>
-            <ul class="list-group">
-                <li class="list-group-item" th:each="user : ${allUsers}" th:text="${user.username}"></li>
-            </ul>
+            <div th:if="${allUsers == null or allUsers.isEmpty()}" class="alert alert-light">
+            There are no users
+            </div>
+            <div class="scrollable-section">
+                <ul class="list-group">
+                    <li class="list-group-item" th:each="user : ${allUsers}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 th:text="${user.username}"></h5>
+                                <p class="mb-1">
+                                    <strong>Confirmed Bookings:</strong>
+                                    <span th:text="${#strings.listJoin(user.confirmedBookings.![title], '; ')}"></span> <!--collects all titles from a user's confirmed bookings and concatenates them into a string separated by semicolons. -->
+                                    <br>
+                                    <strong>Requesting Bookings:</strong>
+                                    <span th:text="${#strings.listJoin(user.requestingBookings.![title], '; ')}"></span>
+                                </p>
+                            </div>
+                            <div>
+                                <form th:if="${!user.verified}" th:action="@{/configuration/users/verify}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm">Verify</button>
+                                    <input type="hidden" name="userId" th:value="${user.id}"/>
+                                </form>
+                                <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${user.id})}" class="btn btn-primary btn-sm">Chat</a>
+                                <form th:action="@{/users/delete/{userId} (userId=${user.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this user?');">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div>
             <h3>All Bookings</h3>
-            <ul class="list-group">
-                <li class="list-group-item" th:each="booking : ${bookingsEntities}" th:text="${booking.title}"></li>
-            </ul>
+            <div th:if="${bookingsEntities == null or bookingsEntities.isEmpty()}" class="alert alert-light">
+                There are no bookings
+            </div>
+            <div class="scrollable-section">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${bookingsEntities}">
+                        <span th:text="${booking.title}"></span>
+                        <div>
+                            <a th:href="@{/bookings/{bookingId}(bookingId=${booking.id})}" class="btn btn-info btn-sm">Detail</a>
+                            <form th:action="@{/bookings/delete/{bookingId}(bookingId=${booking.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -118,36 +184,63 @@
         <h2 class="section-title">Your Bookings</h2>
         <div class="mb-4">
             <h3>Confirmed Bookings</h3>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${userConfirmedBooks}">
-                    <div>
-                        <h5 th:text="${booking.title}"></h5>
-                        <p class="mb-0">
-                            <span th:text="${booking.city}"></span>,
-                            <span th:text="${booking.address}"></span>,
-                            <span th:text="${booking.country}"></span>
-                        </p>
-                    </div>
-                    <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-primary btn-sm">Detail</a>
-                </li>
-            </ul>
+            <div th:if="${currentUser.confirmedBookings == null or currentUser.confirmedBookings.isEmpty()}" class="alert alert-light">
+                There are not confirmed bookings
+            </div>
+            <div class="scrollable-section" th:if="${currentUser.confirmedBookings != null and !currentUser.confirmedBookings.isEmpty()}">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${userConfirmedBooks}">
+                        <div>
+                            <h5 th:text="${booking.title}"></h5>
+                            <p class="mb-0">
+                                <span th:text="${booking.city}"></span>,
+                                <span th:text="${booking.address}"></span>,
+                                <span th:text="${booking.country}"></span>
+                            </p>
+                        </div>
+                        <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-primary btn-sm">Detail</a>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div>
             <h3>Booking Requests</h3>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${userBookingRequest}">
-                    <div>
-                        <h5 th:text="${request.title}"></h5>
-                        <p class="mb-0">
-                            <span th:text="${request.city}"></span>,
-                            <span th:text="${request.address}"></span>,
-                            <span th:text="${request.country}"></span>
-                        </p>
-                    </div>
-                    <a th:href="@{/bookings/{id}(id=${request.id})}" class="btn btn-primary btn-sm">Detail</a>
-                </li>
-            </ul>
+            <div th:if="${currentUser.requestingBookings == null or currentUser.requestingBookings.isEmpty()}" class="alert alert-light">
+                There are not requested bookings
+            </div>
+            <div class="scrollable-section" th:if="${currentUser.requestingBookings != null and !currentUser.requestingBookings.isEmpty()}">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${userBookingRequest}">
+                        <div>
+                            <h5 th:text="${request.title}"></h5>
+                            <p class="mb-0">
+                                <span th:text="${request.city}"></span>,
+                                <span th:text="${request.address}"></span>,
+                                <span th:text="${request.country}"></span>
+                            </p>
+                        </div>
+                        <a th:href="@{/bookings/{id}(id=${request.id})}" class="btn btn-primary btn-sm">Detail</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+        <div class="mb-4" style="margin-top: 20px">
+            <h3>Existing Chats</h3>
+            <div class="scrollable-section">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="chat : ${userExistingChats}">
+                        <div>
+                            <strong>Chat with: </strong>
+                            <span th:each="participant : ${chat.participants}"
+                                  th:if="${participant.id} != ${currentUser.id}"
+                                  th:text="${participant.username}"></span>
+                        </div>
+                        <a th:href="@{/chat/{chatId}(chatId=${chat.id})}" class="btn btn-primary btn-sm">Chat</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
     </div>
 </div>
 

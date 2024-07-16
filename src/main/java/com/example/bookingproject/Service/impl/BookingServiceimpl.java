@@ -23,11 +23,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -147,13 +150,13 @@ public class BookingServiceimpl implements BookingService {
 
         // Also i can use Iterator instead of new Arraylist to create a copy of the collection we are iterating over. This allows us to safely modify the original collection during iteration.
         for (UserEntity user : new ArrayList<>(bookingEntity.getRequestingUsers())) {
-            user.getBookRequest().remove(bookingEntity);
+            user.getRequestingBookings().remove(bookingEntity);
             userService.save(user);
         }
         bookingEntity.getRequestingUsers().clear();
 
         for (UserEntity user : new ArrayList<>(bookingEntity.getConfirmedUsers())) {
-            user.getUserBooks().remove(bookingEntity);
+            user.getConfirmedBookings().remove(bookingEntity);
             userService.save(user);
         }
         bookingEntity.getConfirmedUsers().clear();
@@ -231,5 +234,31 @@ public class BookingServiceimpl implements BookingService {
    {
     return bookingRepository.save(bookingEntity);
    }
+
+    @Override
+    public ResponseEntity<Object> redirect(String redirectUrl, String param) {
+        ServletUriComponentsBuilder builder = (ServletUriComponentsBuilder) ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(redirectUrl);
+
+        if (param != null && !param.isEmpty()) {
+            builder.queryParam(param);
+        }
+
+        URI location = builder.build().toUri();
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(location)
+                .build();
+    }
+    @Override
+    @Transactional
+    public void updateBookingRating(BookingEntity booking) {
+        booking = bookingRepository.findById(booking.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Booking not found"));
+
+        Double averageRating = booking.calculateAverageRating();
+        booking.setRating(averageRating);
+        bookingRepository.save(booking);
+    }
 
 }

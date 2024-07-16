@@ -3,6 +3,7 @@ package com.example.bookingproject.Service.Security;
 import com.example.bookingproject.Dto.BookingRequestDto;
 import com.example.bookingproject.Dto.security.RegistrationDto;
 import com.example.bookingproject.Model.BookingEntity;
+import com.example.bookingproject.Model.Chat;
 import com.example.bookingproject.Model.Comment;
 
 import com.example.bookingproject.Model.Security.RoleEntity;
@@ -11,10 +12,13 @@ import com.example.bookingproject.Repository.MessageRepository;
 import com.example.bookingproject.Repository.Security.RoleRepository;
 import com.example.bookingproject.Repository.Security.UserRepository;
 import com.example.bookingproject.Security.SecurityUtil;
+import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.ChatService;
+import com.example.bookingproject.Service.CommentService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +33,21 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceimpl implements UserService{
     private UserRepository userRepository; private RoleRepository roleRepository;  // implements methods from repositories
-    private PasswordEncoder passwordEncoder;  private MessageRepository messageRepository; private ChatService chatService;
+    private PasswordEncoder passwordEncoder;  ; private ChatService chatService;
+    @Lazy
     @Autowired
-    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MessageRepository messageRepository , ChatService chatService) {
+    private CommentService commentService;
+    private BookingService bookingService;
+    @Autowired
+    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder ,ChatService chatService,BookingService bookingService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-        this.messageRepository = messageRepository;
-        this.chatService=chatService;
+        this.chatService = chatService;
+        this.bookingService = bookingService;
     }
 
+    @Transactional
     @Override
     public void saveUser(RegistrationDto registrationDto) {
         UserEntity userEntity = new UserEntity(); // we cant save RegistrationDto to the database because it`s totally different entity
@@ -74,9 +83,6 @@ public class UserServiceimpl implements UserService{
         Optional<UserEntity> optionalUser = userRepository.findById(userId);
         return optionalUser.orElse(null);
     }
-
-
-
 
     @Override
     public List<UserEntity> search(String query, String type) {
@@ -199,6 +205,48 @@ public class UserServiceimpl implements UserService{
     @Override
     public List<UserEntity> findAllBookingsCreators() {
         return userRepository.findAllUsersWithAuthoredBookings();
+    }
+
+    @Override
+    public void deleteUser(Long userId) throws Exception {
+
+        UserEntity user = findById(userId);
+        // AuthoredBookings
+        for(BookingEntity bookingEntity: new ArrayList<>(user.getAuthoredBookings()))
+        {
+            bookingService.deleteBooking(bookingEntity.getId());
+        }
+        // Requested Bookings
+        for(BookingEntity bookingEntity: new ArrayList<>(user.getRequestingBookings()))
+        {
+            bookingEntity.removeRequestingUser(user);
+        }
+        // Confirmed Bookings
+        for(BookingEntity bookingEntity: new ArrayList<>(user.getConfirmedBookings()))
+        {
+            bookingEntity.removeRequestingUser(user);
+        }
+        // Comments
+        for(Comment comment: new ArrayList<>(user.getComments()))
+        {
+         commentService.delete(comment);
+        }
+        // Chats
+        for(Chat chat : new ArrayList<>(user.getChats()))
+        {
+            chatService.delete(chat);
+        }
+
+        userRepository.delete(user);
+
+
+    }
+
+    @Override
+    public void verifyUser(Long userId) {
+        UserEntity user= findById(userId);
+        user.setVerified(true);
+        save(user);
     }
 
 }

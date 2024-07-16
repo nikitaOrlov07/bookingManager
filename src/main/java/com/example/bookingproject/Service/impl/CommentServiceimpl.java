@@ -10,6 +10,7 @@ import com.example.bookingproject.Service.CommentService;
 import com.example.bookingproject.Service.Security.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,8 +19,10 @@ import java.util.List;
 
 @Service
 public class CommentServiceimpl implements CommentService {
-
-    private UserService userService; private BookingService bookingService; private CommentRepository commentRepository;
+    @Lazy
+    private UserService userService;
+    private BookingService bookingService;
+    private CommentRepository commentRepository;
 
     @Autowired
     public CommentServiceimpl(UserService userService, BookingService bookingService, CommentRepository commentRepository) {
@@ -39,9 +42,8 @@ public class CommentServiceimpl implements CommentService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = currentDateTime.format(formatter);
         comment.setPubDate(formattedDateTime);
-
         commentRepository.save(comment);
-
+        bookingService.updateBookingRating(bookingEntity); // update booking rating
         return comment;
     }
 

@@ -4,6 +4,7 @@ import com.example.bookingproject.Config.BookingTime;
 import com.example.bookingproject.Config.BookingType;
 import com.example.bookingproject.Config.Currency;
 import com.example.bookingproject.Model.Security.UserEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,7 +35,6 @@ public class BookingEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
     private  Boolean occupied; // will be false if neihborCount = capacity
-    private Double rating;
     private  String companyName;
 
     // Amenities
@@ -64,6 +64,7 @@ public class BookingEntity {
 
     // Users
     @ManyToMany
+    @JsonBackReference
     @JoinTable(
             name = "booking_confirmed_users",
             joinColumns = @JoinColumn(name = "booking_id"),
@@ -72,6 +73,7 @@ public class BookingEntity {
     private Set<UserEntity> confirmedUsers = new HashSet<>();
 
     @ManyToMany
+    @JsonBackReference
     @JoinTable(
             name = "booking_requesting_users",
             joinColumns = @JoinColumn(name = "booking_id"),
@@ -81,17 +83,17 @@ public class BookingEntity {
 
     public void removeRequestingUser(UserEntity user) {
         requestingUsers.remove(user);
-        user.getBookRequest().remove(this);
+        user.getRequestingBookings().remove(this);
     }
 
     public void addConfirmedUser(UserEntity user) {
         confirmedUsers.add(user);
-        user.getUserBooks().add(this);
+        user.getConfirmedBookings().add(this);
     }
 
     public void removeConfirmedUser(UserEntity user) {
         confirmedUsers.remove(user);
-        user.getUserBooks().remove(this);
+        user.getConfirmedBookings().remove(this);
 
     }
     // Comments For BookingEntity
@@ -108,6 +110,19 @@ public class BookingEntity {
     // Advert author
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
+    @JsonBackReference
     private UserEntity author;
+
+    // Rating
+    private Double rating ;
+    public Double calculateAverageRating() {
+        if (comments == null || comments.isEmpty()) {
+            return 1.0;
+        }
+        double sum = comments.stream()
+                .mapToDouble(Comment::getRating)
+                .sum();
+        return Math.round((sum / comments.size()) * 10.0) / 10.0; // made round to one decimal place
+    }
 
 }

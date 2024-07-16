@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -81,6 +80,7 @@ public class MainController {
             companyBookingEntities.remove(bookingEntity);
          }
 
+        System.out.println(bookingEntity.getRating());
         model.addAttribute("booking",bookingEntity);
         model.addAttribute("companyBookingEntities",companyBookingEntities);
         model.addAttribute("user",user);
@@ -113,18 +113,21 @@ public class MainController {
         // For Admin
         if (user.hasAdminRole())
         {
+            log.info("user has admin role");
             List<UserEntity> bookingsCreatorsList = userService.findAllBookingsCreators();
+            bookingsCreatorsList.remove(user);
             model.addAttribute("bookingsCreators", bookingsCreatorsList);
 
             List<UserEntity> allUserLists = userService.findAllUsers();
+            allUserLists.remove(user);
             model.addAttribute("allUsers", allUserLists);
 
             List<BookingEntity> bookingEntities = bookingService.findAllBookings();
             model.addAttribute("bookingsEntities", bookingEntities);
         }
         // For all users
-        Set<BookingEntity> userConfirmedBooking = user.getUserBooks();
-        Set<BookingEntity> userBookingRequest= user.getBookRequest();
+        Set<BookingEntity> userConfirmedBooking = user.getConfirmedBookings();
+        Set<BookingEntity> userBookingRequest= user.getRequestingBookings();
 
         model.addAttribute("userConfirmedBooks",userConfirmedBooking.stream().toList());
         model.addAttribute("userBookingRequest",userBookingRequest.stream().toList());

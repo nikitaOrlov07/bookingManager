@@ -1,5 +1,6 @@
 package com.example.bookingproject.Model.Security;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class RoleEntity {
     private String name;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonBackReference
     private List<UserEntity> users = new ArrayList<>();
 
 }
