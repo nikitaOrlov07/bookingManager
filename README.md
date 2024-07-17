@@ -1,7 +1,5 @@
 # Booking Application
 
-![Booking App Logo](path/to/your/logo.png)
-
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
