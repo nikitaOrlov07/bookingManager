@@ -95,8 +95,9 @@ All features of authenticated users, plus:
 *configuration page*
 
 ### Configuration Page (for bookings admin)
-![image](https://github.com/user-attachments/assets/a1282392-e354-4d2a-927a-f3d824c5aa5d)
-![image](https://github.com/user-attachments/assets/daff654b-185b-4f81-8137-028d7d3666b2)
+![image](https://github.com/user-attachments/assets/f4b9f868-bcb8-429a-80f7-cbbd65c91a7b)
+![image](https://github.com/user-attachments/assets/213d7128-a810-419c-9261-ffe6614c2ed9)
+
 *configuration page*
 
 ### Chat page
