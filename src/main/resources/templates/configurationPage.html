@@ -25,6 +25,13 @@
             max-height: 300px;
             overflow-y: auto;
         }
+        .badge-danger-custom {
+           color:red;
+        }
+
+        .badge-success-custom {
+            color: green;
+        }
     </style>
 </head>
 <body layout:fragment="body" >
@@ -52,42 +59,88 @@
         </div>
     </div>
 
-    <!-- Bookings Creator Section -->
     <div th:if="${currentUser.authoredBookings.size() > 0}" class="profile-section">
-        <h2 class="section-title">Bookings , that was created by you:</h2>
+        <h2 class="section-title">Bookings created by you:</h2>
+
+        <!-- Booking Requests -->
         <div class="mb-4">
             <h3>Booking Requests</h3>
-            <div class="scrollable-section">
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingRequests}">
-                        <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
-                        <div>
-                            <form method="post" th:action="@{/configuration/confirmRequest}" class="d-inline">
-                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
-                                <input type="hidden" name="username" th:value="${request.username}"/>
-                                <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
-                            </form>
-                            <form method="post" th:action="@{/configuration/rejectRequest}" class="d-inline">
-                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
-                                <input type="hidden" name="username" th:value="${request.username}"/>
-                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                            </form>
-                        </div>
-                    </li>
-                </ul>
+            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${!booking.getRequestingUsers().isEmpty()}">
+                <h4>
+                    <span th:text="${booking.title}"></span>
+                    <span th:text="${booking.occupied ? '(Occupied)' : '(Available)'}"
+                          th:class="${booking.occupied ? 'badge badge-danger-custom' : 'badge badge-success-custom'}">
+                   </span>
+                </h4>
+                <div class="scrollable-section">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="request : ${bookingRequests}"
+                            th:if="${request.bookingTitle == booking.title}">
+                            <span th:text="${request.username}"></span>
+                            <div>
+                                <form method="post" th:if="${request.occupied != true}" th:action="@{/configuration/confirmRequest}" class="d-inline">
+                                    <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
+                                    <input type="hidden" name="username" th:value="${request.username}"/>
+                                    <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+                                </form>
+                                <form method="post" th:action="@{/configuration/rejectRequest}" class="d-inline">
+                                    <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                                    <input type="hidden" name="username" th:value="${request.username}"/>
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmed Bookings -->
+        <div>
+            <h3>Confirmed Bookings</h3>
+            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${!booking.confirmedUsers.isEmpty()}">
+                <h4>
+                    <span th:text="${booking.title}"></span>
+                    <span th:text="${booking.occupied ? '(Occupied)' : '(Available)'}"
+                          th:class="${booking.occupied ? 'badge badge-danger-custom' : 'badge badge-success-custom'}">
+                    </span>
+                </h4>
+                <div th:if="${bookingConfirmed == null or bookingConfirmed.isEmpty()}" class="alert alert-light">
+                    There are no confirmed users for this booking
+                </div>
+                <div class="scrollable-section">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="request : ${bookingConfirmed}"
+                            th:if="${request.bookingTitle == booking.title}">
+                            <span th:text="${request.username}"></span>
+                            <div>
+                                <form method="post" th:action="@{/configuration/deleteConfirm}" class="d-inline">
+                                    <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
+                                    <input type="hidden" name="username" th:value="${request.username}"/>
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div>
-            <h3>Confirmed Bookings</h3>
+            <h3>Your created Bookings</h3>
+            <div th:if="${bookingsEntities == null or bookingsEntities.isEmpty()}" class="alert alert-light">
+                There are no bookings
+            </div>
             <div class="scrollable-section">
                 <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="request : ${bookingConfirmed}">
-                        <span th:text="${request.bookingTitle + ' - ' + request.username}"></span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="booking : ${currentUser.authoredBookings}">
+                        <span th:text="${booking.title}"></span>
+
                         <div>
-                            <form method="post" th:action="@{/configuration/deleteConfirm}" class="d-inline">
-                                <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}" />
-                                <input type="hidden" name="username" th:value="${request.username}"/>
-                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            <a th:href="@{/bookings/{bookingId}(bookingId=${booking.id})}" class="btn btn-info btn-sm">Detail</a>
+                            <form th:action="@{/bookings/delete/{bookingId}(bookingId=${booking.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
                         </div>
                     </li>
@@ -226,6 +279,9 @@
         </div>
         <div class="mb-4" style="margin-top: 20px">
             <h3>Existing Chats</h3>
+            <div th:if="${currentUser.chats != null and currentUser.chats.isEmpty()}" class="alert alert-light">
+                There are no chats
+            </div>
             <div class="scrollable-section">
                 <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center" th:each="chat : ${userExistingChats}">

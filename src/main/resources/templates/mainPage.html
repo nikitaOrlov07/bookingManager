@@ -6,13 +6,14 @@
       layout:decorate="~{layout}">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Bookings</title>
+    <link rel="stylesheet" th:href="@{/css/mainPage.css}" />
 </head>
 <body layout:fragment="body" th:data-page-no="${bookings.pageNo}" th:data-page-size="${bookings.pageSize}">
-<section>
+<section class="pb-5">
     <div class="container mt-4">
         <!-- Search Form -->
-        <h2 style="color: white">Search Bookings:</h2>
+        <h2>Search Bookings</h2>
         <form id="searchForm" th:action="@{/home/find}" method="get" class="mb-4">
             <div class="row g-3">
                 <div class="col-md-3">
@@ -56,16 +57,19 @@
                 </div>
             </div>
         </form>
+
+        <!-- Alerts -->
         <div th:if="${param.operationError != null}" class="alert alert-danger" id="operationError">
             You are not allowed to do this operation
         </div>
         <div th:if="${param.successDeletedBooking}" class="alert alert-success" id="successDeletedBooking">
             Booking was successfully deleted
         </div>
-        <!-- Existing content -->
-        <h2 style="color: white">Available booking:</h2>
+
+        <!-- Booking Cards -->
+        <h2>Available Bookings</h2>
         <div th:if="${bookings != null and bookings.data.isEmpty()}" class="alert alert-light">
-           No variables
+            No bookings available
         </div>
         <div class="row" th:if="${bookings != null and !bookings.data.isEmpty()}">
             <div th:each="booking : ${bookings.data}" class="col-md-4 mb-4">
@@ -91,7 +95,7 @@
                         </p>
                         <p class="card-text">
                             <strong>Available Spots:</strong>
-                            <span th:text="${booking.capacity != null && booking.neighborCount != null} ? ${booking.capacity - booking.neighborCount} : 'Not specified'"></span>
+                            <span th:text="${booking.capacity != null && booking.confirmedUsers != null} ? ${booking.capacity - booking.confirmedUsers.size()} : 'Not specified'"></span>
                         </p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0">
@@ -100,194 +104,198 @@
                 </div>
             </div>
         </div>
-        <!-- Pagination -->
-        <th:block th:with="startPage=${bookings.pageNo > 5 ? bookings.pageNo - 5 : 0}" th:if="${bookings != null && !#lists.isEmpty(bookings.data)}">
-            <nav aria-label="Pagination">
-                <ul class="pagination justify-content-center my-4">
-                    <li class="page-item" th:class="${bookings.pageNo == 0} ? 'disabled' : ''">
-                        <a class="page-link" id="newerLink" aria-disabled="true"><-</a>
-                    </li>
+    </div>
 
-                    <li th:each="pageNumber : ${#numbers.sequence(startPage, bookings.totalPages - 1)}" class="page-item" th:class="${pageNumber == bookings.pageNo} ? 'active' : ''">
-                        <a th:if="${pageNumber <= bookings.pageNo + 5}" class="page-link page-number-link" th:text="${pageNumber+1}"></a>
-                        <a th:if="${pageNumber == bookings.totalPages}" class="page-link page-number-link" th:text="${pageNumber}"></a>
-                    </li>
+    <!-- Pagination -->
+    <th:block th:with="startPage=${bookings.pageNo > 5 ? bookings.pageNo - 5 : 0}" th:if="${bookings != null && !#lists.isEmpty(bookings.data)}">
+        <nav aria-label="Pagination">
+            <ul class="pagination justify-content-center my-4">
+                <li class="page-item" th:class="${bookings.pageNo == 0} ? 'disabled' : ''">
+                    <a class="page-link" id="newerLink" aria-disabled="true"><-</a>
+                </li>
 
-                    <li class="page-item" th:class="${bookings.pageNo == bookings.totalPages - 1} ? 'disabled' : ''">
-                        <a class="page-link" id="olderLink">-></a>
-                    </li>
-                </ul>
-            </nav>
-        </th:block>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                let path = window.location.pathname;
-                let body = document.querySelector('body');
-                let pageNo = parseInt(body.getAttribute('data-page-no') || 0);
-                let pageSize = parseInt(body.getAttribute('data-page-size') || 12);
-                let totalPages = parseInt(body.getAttribute('total-pages'));
+                <li th:each="pageNumber : ${#numbers.sequence(startPage, bookings.totalPages - 1)}" class="page-item" th:class="${pageNumber == bookings.pageNo} ? 'active' : ''">
+                    <a th:if="${pageNumber <= bookings.pageNo + 5}" class="page-link page-number-link" th:text="${pageNumber+1}"></a>
+                    <a th:if="${pageNumber == bookings.totalPages}" class="page-link page-number-link" th:text="${pageNumber}"></a>
+                </li>
 
-                // search parameters
-                let type = ''; let occupied = ''; let country = ''; let city = ''; let address = ''; let query = ''; let sort = ''; let companyName = '';
+                <li class="page-item" th:class="${bookings.pageNo == bookings.totalPages - 1} ? 'disabled' : ''">
+                    <a class="page-link" id="olderLink">-></a>
+                </li>
+            </ul>
+        </nav>
+    </th:block>
+</section>
 
-                // If we are on the /home/find page, get the selected values from localStorage
-                if (path === '/home/find') {
-                    type = localStorage.getItem('selectedType') || '';
-                    occupied = localStorage.getItem('selectedOccupied') || '';
-                    country = localStorage.getItem('selectedCountry') || '';
-                    city = localStorage.getItem('selectedCity') || '';
-                    address = localStorage.getItem('selectedAddress') || '';
-                    query = localStorage.getItem('selectedQuery') || '';
-                    companyName = localStorage.getItem('selectedCompanyName') || '';
-                    sort = localStorage.getItem('selectedSort') || '';
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let path = window.location.pathname;
+        let body = document.querySelector('body');
+        let pageNo = parseInt(body.getAttribute('data-page-no') || 0);
+        let pageSize = parseInt(body.getAttribute('data-page-size') || 12);
+        let totalPages = parseInt(body.getAttribute('total-pages'));
+
+        // search parameters
+        let type = ''; let occupied = ''; let country = ''; let city = ''; let address = ''; let query = ''; let sort = ''; let companyName = '';
+
+        // If we are on the /home/find page, get the selected values from localStorage
+        if (path === '/home/find') {
+            type = localStorage.getItem('selectedType') || '';
+            occupied = localStorage.getItem('selectedOccupied') || '';
+            country = localStorage.getItem('selectedCountry') || '';
+            city = localStorage.getItem('selectedCity') || '';
+            address = localStorage.getItem('selectedAddress') || '';
+            query = localStorage.getItem('selectedQuery') || '';
+            companyName = localStorage.getItem('selectedCompanyName') || '';
+            sort = localStorage.getItem('selectedSort') || '';
+        }
+
+        // Construct search parameters string
+        let searchParams = '';
+        if (type) searchParams += '&type=' + encodeURIComponent(type);
+        if (occupied) searchParams += '&occupied=' + encodeURIComponent(occupied);
+        if (country) searchParams += '&country=' + encodeURIComponent(country);
+        if (city) searchParams += '&city=' + encodeURIComponent(city);
+        if (address) searchParams += '&address=' + encodeURIComponent(address);
+        if (query) searchParams += '&query=' + encodeURIComponent(query);
+        if (companyName) searchParams += '&companyName=' + encodeURIComponent(companyName);
+        if (sort) searchParams += '&sort=' + encodeURIComponent(sort);
+
+        let newPageNo = pageNo - 1; // previous page
+        let oldPageNo = pageNo + 1; // next page
+
+        // Pagination logic
+        if(totalPages !== 0) {
+            let newerLink = document.getElementById('newerLink');
+            if (newerLink) {
+                newerLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (newPageNo >= 0) {
+                        window.location.href = path + "?pageNo=" + newPageNo + "&pageSize=" + pageSize + searchParams;
+                    }
+                });
+            }
+
+            let olderLink = document.getElementById('olderLink');
+            if (olderLink) {
+                olderLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (oldPageNo < totalPages) {
+                        window.location.href = path + "?pageNo=" + oldPageNo + "&pageSize=" + pageSize + searchParams;
+                    }
+                });
+            }
+
+            let pageNumberLinks = document.getElementsByClassName('page-number-link');
+            for (let i = 0; i < pageNumberLinks.length; i++) {
+                let pageNumber = parseInt(pageNumberLinks[i].innerText);
+                pageNumberLinks[i].href = path + "?pageNo=" + (pageNumber - 1) + "&pageSize=" + pageSize + searchParams;
+            }
+        }
+
+        // Search form logic
+        let searchForm = document.getElementById('searchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                let type = document.querySelector('select[name="type"]').value;
+                let occupied = document.querySelector('select[name="occupied"]').value;
+                let country = document.querySelector('input[name="country"]').value;
+                let city = document.querySelector('input[name="city"]').value;
+                let address = document.querySelector('input[name="address"]').value;
+                let query = document.querySelector('input[name="query"]').value;
+                let sort = document.querySelector('select[name="sort"]').value;
+                let companyName = document.querySelector('input[name="companyName"]').value;
+                let url = '/home/find';
+                let params = [];
+
+                // Store values to localStorage
+                localStorage.setItem('selectedType', type);
+                localStorage.setItem('selectedOccupied', occupied);
+                localStorage.setItem('selectedCountry', country);
+                localStorage.setItem('selectedCity', city);
+                localStorage.setItem('selectedAddress', address);
+                localStorage.setItem('selectedQuery', query);
+                localStorage.setItem('selectedSort', sort);
+                localStorage.setItem('selectedCompanyName', companyName);
+
+                if (type !== '') params.push('type=' + encodeURIComponent(type));
+                if (occupied !== '') params.push('occupied=' + encodeURIComponent(occupied));
+                if (country !== '') params.push('country=' + encodeURIComponent(country));
+                if (city !== '') params.push('city=' + encodeURIComponent(city));
+                if (address !== '') params.push('address=' + encodeURIComponent(address));
+                if (query !== '') params.push('query=' + encodeURIComponent(query));
+                if (sort !== '') params.push('sort=' + encodeURIComponent(sort));
+                if (companyName !== '') params.push('companyName=' + encodeURIComponent(companyName));
+
+                if (params.length === 0) {
+                    window.location.href = '/home';
+                    return;
                 }
 
-                // Construct search parameters string
-                let searchParams = '';
-                if (type) searchParams += '&type=' + encodeURIComponent(type);
-                if (occupied) searchParams += '&occupied=' + encodeURIComponent(occupied);
-                if (country) searchParams += '&country=' + encodeURIComponent(country);
-                if (city) searchParams += '&city=' + encodeURIComponent(city);
-                if (address) searchParams += '&address=' + encodeURIComponent(address);
-                if (query) searchParams += '&query=' + encodeURIComponent(query);
-                if (companyName) searchParams += '&companyName=' + encodeURIComponent(companyName);
-                if (sort) searchParams += '&sort=' + encodeURIComponent(sort);
-
-                let newPageNo = pageNo - 1; // previous page
-                let oldPageNo = pageNo + 1; // next page
-
-                // Pagination logic
-                if(totalPages !== 0) {
-                    let newerLink = document.getElementById('newerLink');
-                    if (newerLink) {
-                        newerLink.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            if (newPageNo >= 0) {
-                                window.location.href = path + "?pageNo=" + newPageNo + "&pageSize=" + pageSize + searchParams;
-                            }
-                        });
-                    }
-
-                    let olderLink = document.getElementById('olderLink');
-                    if (olderLink) {
-                        olderLink.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            if (oldPageNo < totalPages) {
-                                window.location.href = path + "?pageNo=" + oldPageNo + "&pageSize=" + pageSize + searchParams;
-                            }
-                        });
-                    }
-
-                    let pageNumberLinks = document.getElementsByClassName('page-number-link');
-                    for (let i = 0; i < pageNumberLinks.length; i++) {
-                        let pageNumber = parseInt(pageNumberLinks[i].innerText);
-                        pageNumberLinks[i].href = path + "?pageNo=" + (pageNumber - 1) + "&pageSize=" + pageSize + searchParams;
-                    }
-                }
-
-                // Search form logic
-                let searchForm = document.getElementById('searchForm');
-                if (searchForm) {
-                    searchForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-
-                        let type = document.querySelector('select[name="type"]').value;
-                        let occupied = document.querySelector('select[name="occupied"]').value;
-                        let country = document.querySelector('input[name="country"]').value;
-                        let city = document.querySelector('input[name="city"]').value;
-                        let address = document.querySelector('input[name="address"]').value;
-                        let query = document.querySelector('input[name="query"]').value;
-                        let sort = document.querySelector('select[name="sort"]').value;
-                        let companyName = document.querySelector('input[name="companyName"]').value;
-                        let url = '/home/find';
-                        let params = [];
-
-                        // Store values to localStorage
-                        localStorage.setItem('selectedType', type);
-                        localStorage.setItem('selectedOccupied', occupied);
-                        localStorage.setItem('selectedCountry', country);
-                        localStorage.setItem('selectedCity', city);
-                        localStorage.setItem('selectedAddress', address);
-                        localStorage.setItem('selectedQuery', query);
-                        localStorage.setItem('selectedSort', sort);
-                        localStorage.setItem('selectedCompanyName', companyName);
-
-                        if (type !== '') params.push('type=' + encodeURIComponent(type));
-                        if (occupied !== '') params.push('occupied=' + encodeURIComponent(occupied));
-                        if (country !== '') params.push('country=' + encodeURIComponent(country));
-                        if (city !== '') params.push('city=' + encodeURIComponent(city));
-                        if (address !== '') params.push('address=' + encodeURIComponent(address));
-                        if (query !== '') params.push('query=' + encodeURIComponent(query));
-                        if (sort !== '') params.push('sort=' + encodeURIComponent(sort));
-                        if (companyName !== '') params.push('companyName=' + encodeURIComponent(companyName));
-
-                        if (params.length === 0) {
-                            window.location.href = '/home';
-                            return;
-                        }
-
-                        url += '?' + params.join('&');
-                        window.location.href = url;
-
-                        // Log these values for debugging
-                        console.log("Selected Type:", type);
-                        console.log("Selected Occupied:", occupied);
-                        console.log("Selected Country:", country);
-                        console.log("Selected City:", city);
-                        console.log("Selected Address:", address);
-                        console.log("Selected Query:", query);
-                        console.log("Selected Sort:", sort);
-                        console.log("Selected Company Name:", companyName);
-                    });
-                }
-
-                // Set form fields from localStorage
-                let selectedType = localStorage.getItem('selectedType');
-                let selectedOccupied = localStorage.getItem('selectedOccupied');
-                let selectedCountry = localStorage.getItem('selectedCountry');
-                let selectedCity = localStorage.getItem('selectedCity');
-                let selectedAddress = localStorage.getItem('selectedAddress');
-                let selectedQuery = localStorage.getItem('selectedQuery');
-                let selectedSort = localStorage.getItem('selectedSort');
-                let selectedCompanyName = localStorage.getItem('selectedCompanyName');
-
-                // Set the selected values for each form field
-                if (selectedType) document.querySelector('select[name="type"]').value = selectedType;
-                if (selectedOccupied) document.querySelector('select[name="occupied"]').value = selectedOccupied;
-                if (selectedCountry) document.querySelector('input[name="country"]').value = selectedCountry;
-                if (selectedCity) document.querySelector('input[name="city"]').value = selectedCity;
-                if (selectedAddress) document.querySelector('input[name="address"]').value = selectedAddress;
-                if (selectedQuery) document.querySelector('input[name="query"]').value = selectedQuery;
-                if (selectedSort) document.querySelector('select[name="sort"]').value = selectedSort;
-                if (selectedCompanyName) document.querySelector('input[name="companyName"]').value = selectedCompanyName;
-
-                // Get the attribute of booking data (if available)
-                let bookingData = JSON.parse(body.getAttribute("booking-data") || "[]");
+                url += '?' + params.join('&');
+                window.location.href = url;
 
                 // Log these values for debugging
-                console.log("Selected Type:", selectedType);
-                console.log("Selected Occupied:", selectedOccupied);
-                console.log("Selected Country:", selectedCountry);
-                console.log("Selected City:", selectedCity);
-                console.log("Selected Address:", selectedAddress);
-                console.log("Selected Query:", selectedQuery);
-                console.log("Selected Sort:", selectedSort);
-                console.log("Selected Company Name:", selectedCompanyName);
-                console.log("Booking Data:", bookingData);
-
-                // Redirect to /home if all fields are empty and there's no booking data
-                if (bookingData.length === 1 && !selectedType && !selectedOccupied && !selectedCountry && !selectedCity && !selectedAddress && !selectedQuery && !selectedSort && !selectedCompanyName) {
-                    console.log("Redirecting to /home");
-                    window.location.href = '/home';
-                }
+                console.log("Selected Type:", type);
+                console.log("Selected Occupied:", occupied);
+                console.log("Selected Country:", country);
+                console.log("Selected City:", city);
+                console.log("Selected Address:", address);
+                console.log("Selected Query:", query);
+                console.log("Selected Sort:", sort);
+                console.log("Selected Company Name:", companyName);
             });
+        }
 
-            $(document).ready(function() {
-                hideAlert('operationError');
-                hideAlert('successDeletedBooking');
-            });
-        </script>
+        // Set form fields from localStorage
+        let selectedType = localStorage.getItem('selectedType');
+        let selectedOccupied = localStorage.getItem('selectedOccupied');
+        let selectedCountry = localStorage.getItem('selectedCountry');
+        let selectedCity = localStorage.getItem('selectedCity');
+        let selectedAddress = localStorage.getItem('selectedAddress');
+        let selectedQuery = localStorage.getItem('selectedQuery');
+        let selectedSort = localStorage.getItem('selectedSort');
+        let selectedCompanyName = localStorage.getItem('selectedCompanyName');
+
+        // Set the selected values for each form field
+        if (selectedType) document.querySelector('select[name="type"]').value = selectedType;
+        if (selectedOccupied) document.querySelector('select[name="occupied"]').value = selectedOccupied;
+        if (selectedCountry) document.querySelector('input[name="country"]').value = selectedCountry;
+        if (selectedCity) document.querySelector('input[name="city"]').value = selectedCity;
+        if (selectedAddress) document.querySelector('input[name="address"]').value = selectedAddress;
+        if (selectedQuery) document.querySelector('input[name="query"]').value = selectedQuery;
+        if (selectedSort) document.querySelector('select[name="sort"]').value = selectedSort;
+        if (selectedCompanyName) document.querySelector('input[name="companyName"]').value = selectedCompanyName;
+
+        // Get the attribute of booking data (if available)
+        let bookingData = JSON.parse(body.getAttribute("booking-data") || "[]");
+
+        // Log these values for debugging
+        console.log("Selected Type:", selectedType);
+        console.log("Selected Occupied:", selectedOccupied);
+        console.log("Selected Country:", selectedCountry);
+        console.log("Selected City:", selectedCity);
+        console.log("Selected Address:", selectedAddress);
+        console.log("Selected Query:", selectedQuery);
+        console.log("Selected Sort:", selectedSort);
+        console.log("Selected Company Name:", selectedCompanyName);
+        console.log("Booking Data:", bookingData);
+
+        // Redirect to /home if all fields are empty and there's no booking data
+        if (bookingData.length === 1 && !selectedType && !selectedOccupied && !selectedCountry && !selectedCity && !selectedAddress && !selectedQuery && !selectedSort && !selectedCompanyName) {
+            console.log("Redirecting to /home");
+            window.location.href = '/home';
+        }
+    });
+
+    $(document).ready(function() {
+        hideAlert('operationError');
+        hideAlert('successDeletedBooking');
+    });
+</script>
     </div>
 </section>
 </body>

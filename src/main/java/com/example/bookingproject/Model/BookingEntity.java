@@ -34,7 +34,7 @@ public class BookingEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-    private  Boolean occupied; // will be false if neihborCount = capacity
+    private  Boolean occupied ; // will be false if neihborCount = capacity
     private  String companyName;
 
     // Amenities
@@ -57,8 +57,7 @@ public class BookingEntity {
     private String address;
 
     // Amount
-    private int neighborCount; // will increase , when users book
-    private int capacity;
+    private int capacity = 0;
     private int numberOfRooms;
 
 

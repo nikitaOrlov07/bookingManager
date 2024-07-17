@@ -17,22 +17,24 @@ public interface BookingEntityRepository extends JpaRepository<BookingEntity,Lon
 
 
 
-    //Search bookings by title
-    @Query("Select c from BookingEntity c WHERE c.title LIKE CONCAT('%', :query ,'%')")
-    Page<BookingEntity> getBookingEntitiesByQuery(String query, Pageable pageable);
 
+
+    // Searching bookings by parameters
     @Query("SELECT b FROM BookingEntity b WHERE " +
             "(:bookingType IS NULL OR b.type = :bookingType) AND " +
             "(:occupied IS NULL OR b.occupied = :occupied) AND " +
             "(:country IS NULL OR b.country = :country) AND " +
+            "(:title IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND "+
             "(:city IS NULL OR b.city = :city) AND " +
             "(:address IS NULL OR b.address = :address) AND "+
             "(:companyName IS NULL OR b.companyName = :companyName)")
-    Page<BookingEntity> findByParameters(@Param("bookingType") BookingType bookingType, @Param("occupied") Boolean occupied, @Param("country") String country,
-                                       @Param("city") String city,
-                                       @Param("address") String address,
-                                       @Param("companyName") String companyName,
-                                       Pageable pageable
+    Page<BookingEntity> findByParameters(@Param("bookingType") BookingType bookingType, @Param("occupied") Boolean occupied,
+                                         @Param("country") String country,
+                                         @Param("title") String title,
+                                         @Param("city") String city,
+                                         @Param("address") String address,
+                                         @Param("companyName") String companyName,
+                                         Pageable pageable
     );
     List<BookingEntity> findBookingEntitiesByCompanyName(String companyName);
 

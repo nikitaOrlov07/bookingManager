@@ -31,7 +31,7 @@ public class UserEntity {
     private int roleId; // {0,1}
     private String creationDate;
     private String companyName;
-    private Boolean verified = false;
+    private Boolean verified = false ;
 
 
     @ToString.Exclude

@@ -35,11 +35,14 @@
         Your booking request was successfully removed
     </div>
     <div class="card booking-card">
-        <div th:if="${user != null and user.companyName != null and !user.companyName.isEmpty()}" class="company-banner">
-            <h3 class="company-name" th:text="${user.companyName}"></h3>
+        <div th:if="${booking.author != null and booking.author.companyName != null and booking.author.companyName.isEmpty()}" class="company-banner">
+            <h3 class="company-name" th:text="${booking.author.companyName}"></h3>
         </div>
         <div class="card-body">
             <h2 class="card-title" th:text="${booking.title}">Booking Title</h2>
+            <p th:if="${booking.getAuthor() != null and booking.getAuthor().verified != null and booking.getAuthor().verified}">
+                <i class="fas fa-check-circle text-primary"></i> This user is verified
+            </p>
             <div style="margin-top: 20px;">
                 <form th:if="${user != null and booking != null and
     (
@@ -68,9 +71,10 @@
                 </div>
                 <div class="col-md-6">
                     <p><i class="fas fa-dollar-sign"></i> <span th:text="${booking.price != null ? booking.price + ' ' + (booking.currency != null ? booking.currency : '') + ' ' + (booking.bookingTime != null && !booking.bookingTime.toString().isEmpty() ? 'per ' + booking.bookingTime : 'no specify') : 'no specify'}">no specify</span></p>
-                    <p><i class="fas fa-home"></i> <span th:text="${booking.neighborCount != null ? booking.neighborCount + ' neighbors' : 'no specify'}">no specify</span></p>
+                    <p><i class="fas fa-home"></i> <span th:text="${booking.confirmedUsers != null ? booking.confirmedUsers.size() + ' neighbors' : 'no specify'}">no specify</span></p>
                     <p><i class="fas fa-key"></i> Status: <span th:text="${booking.occupied != null ? (booking.occupied ? 'Occupied' : 'Available') : 'no specify'}"
                                                                 th:class="${booking.occupied != null ? (booking.occupied ? 'text-danger' : 'text-success') : ''}">no specify</span></p>
+
                     <p>
                         <i class="fas fa-star"></i> Rating:
                         <span th:if="${booking.rating != null}">

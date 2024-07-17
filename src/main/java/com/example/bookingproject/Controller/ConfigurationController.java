@@ -36,14 +36,14 @@ public class ConfigurationController {
     @Transactional
     @PostMapping("/confirmRequest")
     public ResponseEntity<?> confirmBookingRequest(@RequestParam("bookingTitle") String bookingTitle,
-                                         @RequestParam("username") String username)
+                                                   @RequestParam("username") String username)
     {
 
         BookingEntity bookingEntity = bookingService.findByTitle(bookingTitle);
         UserEntity user = userService.findByUsername(username);
 
 
-        if (bookingEntity == null || user == null) {
+        if (bookingEntity == null || user == null || bookingEntity.getOccupied() == true ) {
             bookingService.redirect("/home","operationError");
         }
 
@@ -53,6 +53,12 @@ public class ConfigurationController {
 
         bookingEntity.removeRequestingUser(user);
         bookingEntity.addConfirmedUser(user);
+        System.out.println(bookingEntity.getConfirmedUsers().size());
+        if(bookingEntity.getConfirmedUsers().size() == bookingEntity.getCapacity())
+        {
+            bookingEntity.setOccupied(true);
+        }
+
         bookingService.save(bookingEntity);
 
         log.info("Booking confirmed for user {} and booking {}", user.getUsername(), bookingEntity.getId());
@@ -118,6 +124,11 @@ public class ConfigurationController {
         }
 
         bookingEntity.removeConfirmedUser(user);
+
+        if(bookingEntity.getConfirmedUsers().size() < bookingEntity.getCapacity())
+        {
+            bookingEntity.setOccupied(false);
+        }
         bookingService.save(bookingEntity);
 
         log.info("Booking confirmed for user {} and booking {}", user.getUsername(), bookingEntity.getId());
@@ -131,6 +142,7 @@ public class ConfigurationController {
                 .location(location)
                 .build();
     }
+
     // verify admin logic
     @PostMapping("users/verify")
     public ResponseEntity<?> verifyUser(@RequestParam("userId") Long userId)

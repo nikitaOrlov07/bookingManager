@@ -1,125 +1,56 @@
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
->
+      layout:decorate="~{layout}">
 <head>
     <title>Register</title>
-    <style>
-
-        .btn {
-            display: inline-block;
-            font-weight: 400;
-            color: #212529;
-            text-align: center;
-            vertical-align: middle;
-            cursor: pointer;
-            background-color: #818b9a;
-            border: 1px solid transparent;
-            padding: .75rem 1.5rem;
-            font-size: 1.25rem;
-            line-height: 1;
-            border-radius: .25rem;
-            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-            margin-top: 40px;
-        }
-        .btn:hover {
-            color: #ffffff;
-            background-color: #9a9a9a;
-            border-color: #bbb4b4;
-        }
-
-        /* Увеличение размеров формы */
-        .login-form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Увеличение размеров полей ввода на мобильных устройствах */
-        @media screen and (max-width: 768px) {
-            .form-group input {
-                padding: 1rem;
-                font-size: 1rem;
-            }
-        }
-
-    </style>
+    <link  rel="stylesheet" th:href="@{/css/registryPage.css}"/>
 </head>
-<body class="d-flex flex-column h-100">
-<main class="flex-shrink-0">
-    <section layout:fragment="body" class="py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-2">
-                    <div th:if="${param.fail}" class="alert alert-danger" style="width: 500px ; height: 75px">
-                        Username or email already exists
-                    </div>
-                    <div class="login-form" style="width: 15000px">
-                        <form method="post" th:action="@{/register/save}" th:object="${user}">
-                            <div class="form-group" >
-                                <label>Username</label>
-                                <input
-                                        id="username"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Username"
-                                        name="username">
-                                <p th:if="${#fields.hasErrors('username')}" class="text-danger" th:errors="*{username}"> </p>
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input
-                                        id="Email"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Email"
-                                        name="email">
-                                <p th:if="${#fields.hasErrors('email')}" class="text-danger" th:errors="*{email}"> </p>
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input
-                                        id="password"
-                                        type="password"
-                                        class="form-control"
-                                        placeholder="Password"
-                                        name="password">
-                                <p th:if="${#fields.hasErrors('password')}" class="text-danger" th:errors="*{password}"> </p>
-                            </div>
-                            <div class="form-group">
-                                <label>Town</label>
-                                <input
-                                        id="town"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Town"
-                                        name="town">
-                            </div>
-                            <div class="form-group">
-                                <label>Phone Number</label>
-                                <input
-                                        id="phone_number"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Phone Number"
-                                        name="phone_number">
-                            </div>
-                            <div class="form-group">
-                                <label>Company name</label>
-                                <input
-                                        id="companyName"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Company name"
-                                        name="companyName">
-                            </div>
-                            <a th:href="@{/login}" class="btn btn-black" style="margin-right: 20px ">Login here</a>
-                            <button type="submit" class="btn btn-black">Register</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+<body>
+<section layout:fragment="body">
+    <div class="register-container">
+        <h2 class="register-title">Create an Account</h2>
+
+        <div th:if="${param.fail}" class="alert alert-danger">
+            Username or email already exists
         </div>
-    </section>
-</main>
+
+        <form method="post" th:action="@{/register/save}" th:object="${user}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" type="text" class="form-control" placeholder="Enter username" name="username" required>
+                <p th:if="${#fields.hasErrors('username')}" class="text-danger" th:errors="*{username}"></p>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" type="email" class="form-control" placeholder="Enter email" name="email" required>
+                <p th:if="${#fields.hasErrors('email')}" class="text-danger" th:errors="*{email}"></p>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" type="password" class="form-control" placeholder="Enter password" name="password" required>
+                <p th:if="${#fields.hasErrors('password')}" class="text-danger" th:errors="*{password}"></p>
+            </div>
+            <div class="form-group">
+                <label for="town">Town</label>
+                <input id="town" type="text" class="form-control" placeholder="Enter town" name="town">
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number</label>
+                <input id="phone_number" type="tel" class="form-control" placeholder="Enter phone number" name="phone_number">
+            </div>
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input id="companyName" type="text" class="form-control" placeholder="Enter company name" name="companyName">
+            </div>
+            <div style="text-align: center;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+            </div>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <a th:href="@{/login}" class="btn btn-secondary" style="width: 100%;">Already have an account? Login here</a>
+        </div>
+    </div>
+</section>
 </body>
 </html>

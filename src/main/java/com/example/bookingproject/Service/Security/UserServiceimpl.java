@@ -177,7 +177,8 @@ public class UserServiceimpl implements UserService{
             for (UserEntity requester : booking.getRequestingUsers()) {
                 BookingRequestDto dto = new BookingRequestDto(
                         booking.getTitle(),
-                        requester.getUsername()
+                        requester.getUsername(),
+                        booking.getOccupied()
                 );
                 result.add(dto);
             }
@@ -186,15 +187,15 @@ public class UserServiceimpl implements UserService{
         return result;
     }
 
-    @Override
     public List<BookingRequestDto> findUserConfirmsBookings(UserEntity user) {
         List<BookingRequestDto> result = new ArrayList<>();
-        for(BookingEntity booking:user.getAuthoredBookings())
-        {
+
+        for (BookingEntity booking : user.getAuthoredBookings()) {
             for (UserEntity confirmedUser : booking.getConfirmedUsers()) {
                 BookingRequestDto dto = new BookingRequestDto(
                         booking.getTitle(),
-                        confirmedUser.getUsername()
+                        confirmedUser.getUsername(),
+                        booking.getOccupied()
                 );
                 result.add(dto);
             }

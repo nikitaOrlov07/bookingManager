@@ -10,6 +10,7 @@ import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.ChatService;
 import com.example.bookingproject.Service.Security.UserService;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -54,7 +55,7 @@ public class MainController {
                             @RequestParam(value="country",required= false) String country,
                             @RequestParam(value ="city",required = false) String city ,
                             @RequestParam(value = "address",required = false) String address,
-                            @RequestParam(value="query",required = false) String query,
+                            @RequestParam(value="query",required = false) String title,
                             @RequestParam(value = "sort",required = false) String sort,
                             @RequestParam(value = "companyName",required = false) String companyName,
                             // for  pagination
@@ -62,8 +63,8 @@ public class MainController {
                             @RequestParam(value="pageSize", defaultValue="12",required=false) int pageSize
     )
     {
-        BookingPagination bookings = bookingService.findBookingsByParameters(bookingType,occupied,country,city,address,query,sort,companyName,pageNo,pageSize);
-        bookings.getData().forEach(bookingEntity -> System.out.println(bookingEntity.getTitle()));
+        System.out.println(title);
+        BookingPagination bookings = bookingService.findBookingsByParameters(bookingType,occupied,country,city,address,title,sort,companyName,pageNo,pageSize);
         model.addAttribute("bookings", bookings);
         return "mainPage";
     }
@@ -86,6 +87,8 @@ public class MainController {
         model.addAttribute("user",user);
         return "detailPage";
     }
+
+    @Transactional
     @GetMapping("/configuration")
     public String getConfigurationPage(Model model, RedirectAttributes redirectAttributes) {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());

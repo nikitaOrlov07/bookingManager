@@ -16,10 +16,12 @@ public class BookingRequestDto {
 
     private String bookingTitle;
     private String username;
+    private Boolean occupied = false ;
 
-    public BookingRequestDto(String bookingTitle, String username) {
+    public BookingRequestDto(String bookingTitle, String username, Boolean occupied) {
         this.bookingTitle = bookingTitle;
         this.username = username;
+        this.occupied = occupied;
     }
 
 }

@@ -69,7 +69,7 @@ public class BookingServiceimpl implements BookingService {
     }
     @Transactional
     @Override
-    public BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String query, String sort, String companyName, int pageNo, int pageSize) {
+    public BookingPagination findBookingsByParameters(BookingType bookingType, Boolean occupied, String country, String city, String address, String title, String sort, String companyName, int pageNo, int pageSize) {
         Sort sort_object = Sort.unsorted(); // by rating , by bookingsize
         if(sort!=null && !sort.isEmpty())
         {
@@ -82,13 +82,9 @@ public class BookingServiceimpl implements BookingService {
 
         }
         Pageable pageable = PageRequest.of(pageNo, pageSize, sort_object);
-        if (query != null && query.length() > 0) {
-            bookingPage= bookingRepository.getBookingEntitiesByQuery(query, pageable);
-        }
 
-        if (query == null) {
-            bookingPage= bookingRepository.findByParameters(bookingType, occupied, country, city, address,companyName, pageable);
-        }
+        bookingPage= bookingRepository.findByParameters(bookingType, occupied, country,title, city, address,companyName, pageable);
+
         List<BookingEntity> bookingList = bookingPage.getContent();
         BookingPagination bookingPagination = BookingPagination.builder()
                 .data(bookingList)
@@ -109,6 +105,7 @@ public class BookingServiceimpl implements BookingService {
     @Override
     public BookingEntity saveBooking(BookingDto bookingDto) {
         BookingEntity bookingEntity = BookingMapper.getBookingEntityFromBookingDto(bookingDto);
+        bookingEntity.setOccupied(false);
         return bookingRepository.save(bookingEntity);
     }
     @Transactional

@@ -1,0 +1,41 @@
+body {
+    background-color: #f4f4f4;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+h2 {
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.card {
+    transition: transform .2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+.pagination-container {
+    background-color: rgba(255,255,255,0.9);
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    margin-top: auto;
+}
+
+main {
+    flex: 1;
+    padding-bottom: 60px; /* Adjust this value based on your footer height */
+}
