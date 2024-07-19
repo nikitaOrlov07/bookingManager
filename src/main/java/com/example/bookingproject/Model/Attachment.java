@@ -37,6 +37,6 @@ public class Attachment { // for fotos and videos
     @ManyToOne
     @JoinColumn(name = "booking_id")
     @JsonBackReference
-    private BookingEntity booking;;
+    private BookingEntity booking;
 
 }

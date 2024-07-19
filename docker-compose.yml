@@ -1,0 +1,71 @@
+version: '3.8' # dont necessary to specify
+#to create volumes and networks
+volumes:
+  postgres:
+services:
+
+  #for database
+  postgres-server:
+    container_name: postgres-sql3
+    image: postgres
+    #list of environments
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=07022005
+      - POSTGRES_DB=bookingManager
+    #we can expose multiple ports for container
+    ports:
+      - "5433:5432" # right port - is docker container port, left port - computer port
+    # use named volume
+    volumes:
+      - postgres:/var/lib/postgres/data
+    # create a new network
+    networks:
+      - spring-boot-network
+    #restart
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # for init setup
+  postgres-init:
+    image: postgres
+    depends_on:
+      postgres-server:
+        condition: service_healthy
+    volumes:
+      - ./initFile.sql:/initFile.sql
+    command: >
+      bash -c "
+        echo 'Waiting for postgres...' &&
+        while ! pg_isready -h postgres-server -p 5432 -U postgres; do
+          sleep 1;
+        done &&
+        echo 'PostgreSQL is up - executing init script' &&
+        PGPASSWORD=07022005 psql -h postgres-server -U postgres -d  bookingManager -f /initFile.sql
+      "
+    environment:
+      - POSTGRES_PASSWORD=07022005
+    networks:
+      - spring-boot-network
+  #for application
+  projectmanager1-boot-app:
+    build: . # if we have already built this image we use image: name_of_image , if we don't have the image --> build: . (it will build image by dockerFile)
+    container_name: bookingManager
+    ports:
+      - "8081:8080" # left part - computer port, right part - port in container side
+    networks:
+      - spring-boot-network
+    environment:
+      SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres-server:5432/bookingManager'
+      JAVA_OPTS: 'Xmx512m' # maximum amount of memory
+      postgres-server-username: 'postgres'  # username for getting access into database
+      postgres-server-password: '07022005'  # password for getting access into database
+    depends_on:
+      postgres-server:
+          condition: service_healthy # waiting for availability  postgres-server
+networks:
+  spring-boot-network:
+    driver: bridge

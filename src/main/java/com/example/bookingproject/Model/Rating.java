@@ -24,12 +24,12 @@ public class Rating {
     private UserEntity user;
 
     @Column(nullable = false)
-    private int value;
+    private int ratingValue;
 
-    public Rating(BookingEntity booking, UserEntity user, int value) {
+    public Rating(BookingEntity booking, UserEntity user, int ratingValue) {
         this.booking = booking;
         this.user = user;
-        this.value = value;
+        this.ratingValue = ratingValue;
     }
 
 

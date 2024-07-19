@@ -68,6 +68,7 @@ public class MainController {
         model.addAttribute("bookings", bookings);
         return "mainPage";
     }
+    @Transactional
     @GetMapping("/bookings/{bookingId}")
     public String getBookingDetailPage(@PathVariable("bookingId") Long bookingId,
                                        Model model) {
@@ -105,13 +106,9 @@ public class MainController {
                 log.error("Error is null");
             if(bookingRequestsList.isEmpty())
                 log.error("Error is empty");
-            bookingRequestsList.forEach(System.out::println);
-            List<Chat> userExistingChats = chatService.findChatByUser(user);
-            model.addAttribute("userExistingChats", userExistingChats);
-            bookingRequestsList.forEach(System.out::println);
+
             List<BookingRequestDto> bookingConfirmedList = userService.findUserConfirmsBookings(user);
             model.addAttribute("bookingConfirmed", bookingConfirmedList);
-            bookingRequestsList.forEach(System.out::println);
         }
         // For Admin
         if (user.hasAdminRole())

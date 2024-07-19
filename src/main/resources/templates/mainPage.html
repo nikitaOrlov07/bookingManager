@@ -3,15 +3,16 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org"
-      layout:decorate="~{layout}">
+      layout:decorate="~{layout}" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Bookings</title>
     <link rel="stylesheet" th:href="@{/css/mainPage.css}" />
 </head>
 <body layout:fragment="body" th:data-page-no="${bookings.pageNo}" th:data-page-size="${bookings.pageSize}">
-<section class="pb-5">
-    <div class="container mt-4">
+<div class="main-content-wrapper">
+    <section class="pb-5">
+    <div >
         <!-- Search Form -->
         <h2>Search Bookings</h2>
         <form id="searchForm" th:action="@{/home/find}" method="get" class="mb-4">
@@ -297,6 +298,7 @@
     });
 </script>
     </div>
+</div>
 </section>
 </body>
 </html>

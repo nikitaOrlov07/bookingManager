@@ -59,18 +59,31 @@
         </div>
     </div>
 
+
+
+
+
+    <!--Bookings Creator  -->
     <div th:if="${currentUser.authoredBookings.size() > 0}" class="profile-section">
         <h2 class="section-title">Bookings created by you:</h2>
 
         <!-- Booking Requests -->
         <div class="mb-4">
             <h3>Booking Requests</h3>
-            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${!booking.getRequestingUsers().isEmpty()}">
+            <div th:if="${#lists.isEmpty(currentUser.authoredBookings) or #arrays.isEmpty(currentUser.authoredBookings)}"
+                 class="alert alert-light">
+                You have no bookings
+            </div>
+            <div th:if="${not #lists.isEmpty(currentUser.authoredBookings) and #lists.isEmpty(bookingRequests)}"
+                 class="alert alert-light">
+                There are no booking requests for any of your bookings
+            </div>
+            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${not #lists.isEmpty(booking.getRequestingUsers())}">
                 <h4>
                     <span th:text="${booking.title}"></span>
                     <span th:text="${booking.occupied ? '(Occupied)' : '(Available)'}"
                           th:class="${booking.occupied ? 'badge badge-danger-custom' : 'badge badge-success-custom'}">
-                   </span>
+            </span>
                 </h4>
                 <div class="scrollable-section">
                     <ul class="list-group">
@@ -79,7 +92,7 @@
                             th:if="${request.bookingTitle == booking.title}">
                             <span th:text="${request.username}"></span>
                             <div>
-                                <form method="post" th:if="${request.occupied != true}" th:action="@{/configuration/confirmRequest}" class="d-inline">
+                                <form method="post" th:if="${not request.occupied}" th:action="@{/configuration/confirmRequest}" class="d-inline">
                                     <input type="hidden" name="bookingTitle" th:value="${request.bookingTitle}"/>
                                     <input type="hidden" name="username" th:value="${request.username}"/>
                                     <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
@@ -95,20 +108,24 @@
                 </div>
             </div>
         </div>
-
         <!-- Confirmed Bookings -->
         <div>
             <h3>Confirmed Bookings</h3>
-            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${!booking.confirmedUsers.isEmpty()}">
+            <div th:if="${#lists.isEmpty(currentUser.authoredBookings) or #arrays.isEmpty(currentUser.authoredBookings)}"
+                 class="alert alert-light">
+                You have no bookings
+            </div>
+            <div th:if="${not #lists.isEmpty(currentUser.authoredBookings) and #lists.isEmpty(bookingConfirmed)}"
+                 class="alert alert-light">
+                There are no confirmed users for any of your bookings
+            </div>
+            <div th:each="booking : ${currentUser.authoredBookings}" th:if="${not #lists.isEmpty(booking.confirmedUsers)}">
                 <h4>
                     <span th:text="${booking.title}"></span>
                     <span th:text="${booking.occupied ? '(Occupied)' : '(Available)'}"
                           th:class="${booking.occupied ? 'badge badge-danger-custom' : 'badge badge-success-custom'}">
-                    </span>
+            </span>
                 </h4>
-                <div th:if="${bookingConfirmed == null or bookingConfirmed.isEmpty()}" class="alert alert-light">
-                    There are no confirmed users for this booking
-                </div>
                 <div class="scrollable-section">
                     <ul class="list-group">
                         <li class="list-group-item d-flex justify-content-between align-items-center"
@@ -129,7 +146,7 @@
         </div>
         <div>
             <h3>Your created Bookings</h3>
-            <div th:if="${bookingsEntities == null or bookingsEntities.isEmpty()}" class="alert alert-light">
+            <div th:if="${currentUser.authoredBookings == null or currentUser.authoredBookings.isEmpty()}" class="alert alert-light">
                 There are no bookings
             </div>
             <div class="scrollable-section">
@@ -284,7 +301,7 @@
             </div>
             <div class="scrollable-section">
                 <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="chat : ${userExistingChats}">
+                    <li class="list-group-item d-flex justify-content-between align-items-center" th:each="chat : ${currentUser.chats}">
                         <div>
                             <strong>Chat with: </strong>
                             <span th:each="participant : ${chat.participants}"
