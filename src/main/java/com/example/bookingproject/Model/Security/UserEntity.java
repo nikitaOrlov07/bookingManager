@@ -1,10 +1,7 @@
 package com.example.bookingproject.Model.Security;
 
 
-import com.example.bookingproject.Model.BookingEntity;
-import com.example.bookingproject.Model.Chat;
-import com.example.bookingproject.Model.Comment;
-import com.example.bookingproject.Model.Message;
+import com.example.bookingproject.Model.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
@@ -112,7 +109,14 @@ public class UserEntity {
         UserEntity that = (UserEntity) o;
         return Objects.equals(getId(), that.getId());
     }
+    //  Grievance
+    @OneToMany(mappedBy = "complainant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Grievance> filedGrievances = new ArrayList<>();
 
+    @OneToMany(mappedBy = "reportedUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Grievance> receivedGrievances = new ArrayList<>();
     @Override
     public int hashCode() {
         return Objects.hash(getId());

@@ -25,12 +25,28 @@
             max-height: 300px;
             overflow-y: auto;
         }
-        .badge-danger-custom {
-           color:red;
+        .modal-content {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-
-        .badge-success-custom {
-            color: green;
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background-color: #ffca2c;
+            border-color: #ffc720;
+            color: #212529;
         }
     </style>
 </head>
@@ -197,7 +213,7 @@
         <div class="mb-4">
             <h3>All Users</h3>
             <div th:if="${allUsers == null or allUsers.isEmpty()}" class="alert alert-light">
-            There are no users
+                There are no users
             </div>
             <div class="scrollable-section">
                 <ul class="list-group">
@@ -207,7 +223,7 @@
                                 <h5 th:text="${user.username}"></h5>
                                 <p class="mb-1">
                                     <strong>Confirmed Bookings:</strong>
-                                    <span th:text="${#strings.listJoin(user.confirmedBookings.![title], '; ')}"></span> <!--collects all titles from a user's confirmed bookings and concatenates them into a string separated by semicolons. -->
+                                    <span th:text="${#strings.listJoin(user.confirmedBookings.![title], '; ')}"></span>
                                     <br>
                                     <strong>Requesting Bookings:</strong>
                                     <span th:text="${#strings.listJoin(user.requestingBookings.![title], '; ')}"></span>
@@ -228,7 +244,7 @@
                 </ul>
             </div>
         </div>
-        <div>
+        <div class="mb-4">
             <h3>All Bookings</h3>
             <div th:if="${bookingsEntities == null or bookingsEntities.isEmpty()}" class="alert alert-light">
                 There are no bookings
@@ -242,6 +258,42 @@
                             <form th:action="@{/bookings/delete/{bookingId}(bookingId=${booking.id})}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                             </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="mb-4">
+            <h3>Grievances</h3>
+            <div th:if="${grievances == null or grievances.isEmpty()}" class="alert alert-light">
+                There are no grievances
+            </div>
+            <div class="scrollable-section" th:if="${grievances != null and !grievances.isEmpty()}">
+                <ul class="list-group">
+                    <li class="list-group-item" th:each="grievance : ${grievances}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>Grievance #<span th:text="${grievance.id}"></span></h5>
+                                <p class="mb-1" th:text="${grievance.text}"></p>
+                                <p class="mb-1">
+                                    <strong>Status:</strong> <span th:text="${grievance.status}"></span><br>
+                                    <strong>Created at:</strong> <span th:text="${#temporals.format(grievance.createdAt, 'dd-MM-yyyy HH:mm')}"></span>
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Complainant:</strong> <span th:text="${grievance.complainant.username}"></span><br>
+                                    <strong>Reported User:</strong> <span th:text="${grievance.reportedUser.username}"></span>
+                                </p>
+                            </div>
+                            <div>
+                                <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${grievance.complainant.id})}" class="btn btn-primary btn-sm">Chat with Complainant</a>
+                                <a th:href="@{/chat/findOrCreate/{secondId}(secondId=${grievance.reportedUser.id})}" class="btn btn-primary btn-sm">Chat with Reported User</a>
+                                <form  th:action="@{/grievance/resolve/{id}(id=${grievance.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm">Resolve</button>
+                                </form>
+                                <form  th:action="@{/grievance/dismiss/{id}(id=${grievance.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm">Dismiss</button>
+                                </form>
+                            </div>
                         </div>
                     </li>
                 </ul>
@@ -288,8 +340,44 @@
                                 <span th:text="${request.address}"></span>,
                                 <span th:text="${request.country}"></span>
                             </p>
+                            <div>
+                                <div th:if="${!currentUser.equals(request.getAuthor())}">
+                                    <strong th:text="'Host: '+ ${request.getAuthor().getUsername()}"></strong>
+                                    <button th:if="${!grievanceService.hasPendingGrievance(currentUser, request.getAuthor())}"
+                                            class="btn btn-warning btn-sm"
+                                            data-bs-toggle="modal"
+                                            th:data-bs-target="'#grievanceModal' + ${request.id}">
+                                        Grievance
+                                    </button>
+                                    <span th:unless="${!grievanceService.hasPendingGrievance(currentUser, request.getAuthor())}"
+                                          class="text-muted">
+                                          Pending grievance exists
+                                    </span>
+                                </div>
+                            </div>
+                            <strong th:if="${currentUser.equals(request.getAuthor())}"> Host: You </strong>
                         </div>
                         <a th:href="@{/bookings/{id}(id=${request.id})}" class="btn btn-primary btn-sm">Detail</a>
+                        <div class="modal fade" th:id="'grievanceModal' + ${request.id}" tabindex="-1" aria-labelledby="grievanceModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="grievanceModalLabel">Send a complaint</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/grievance/submit}" method="post">
+                                            <input type="hidden" name="reportedUserId" th:value="${request.getAuthor().getId()}">
+                                            <div class="mb-3">
+                                                <label for="grievanceText" class="form-label">Text:</label>
+                                                <textarea class="form-control" id="grievanceText" name="text" rows="3" required></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </div>

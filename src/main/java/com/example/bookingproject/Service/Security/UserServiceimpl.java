@@ -1,14 +1,16 @@
 package com.example.bookingproject.Service.Security;
 
+import com.example.bookingproject.Config.GrievanceStatus;
 import com.example.bookingproject.Dto.BookingRequestDto;
 import com.example.bookingproject.Dto.security.RegistrationDto;
 import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Chat;
 import com.example.bookingproject.Model.Comment;
 
+import com.example.bookingproject.Model.Grievance;
 import com.example.bookingproject.Model.Security.RoleEntity;
 import com.example.bookingproject.Model.Security.UserEntity;
-import com.example.bookingproject.Repository.MessageRepository;
+import com.example.bookingproject.Repository.GrievanceRepository;
 import com.example.bookingproject.Repository.Security.RoleRepository;
 import com.example.bookingproject.Repository.Security.UserRepository;
 import com.example.bookingproject.Security.SecurityUtil;
@@ -23,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,18 +36,19 @@ import java.util.Optional;
 @Slf4j
 public class UserServiceimpl implements UserService{
     private UserRepository userRepository; private RoleRepository roleRepository;  // implements methods from repositories
-    private PasswordEncoder passwordEncoder;  ; private ChatService chatService;
+    private PasswordEncoder passwordEncoder;  ; private ChatService chatService; private GrievanceRepository grievanceRepository;
     @Lazy
     @Autowired
     private CommentService commentService;
     private BookingService bookingService;
     @Autowired
-    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder ,ChatService chatService,BookingService bookingService) {
+    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder ,ChatService chatService,BookingService bookingService, GrievanceRepository grievanceRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.chatService = chatService;
         this.bookingService = bookingService;
+        this.grievanceRepository = grievanceRepository;
     }
 
     @Transactional

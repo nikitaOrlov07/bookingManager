@@ -5,10 +5,12 @@ import com.example.bookingproject.Dto.BookingPagination;
 import com.example.bookingproject.Dto.BookingRequestDto;
 import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Chat;
+import com.example.bookingproject.Model.Grievance;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.BookingService;
 import com.example.bookingproject.Service.ChatService;
+import com.example.bookingproject.Service.GrievanceService;
 import com.example.bookingproject.Service.Security.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +30,13 @@ import java.util.Set;
 public class MainController {
     private BookingService bookingService;
     private UserService userService;
-    private ChatService chatService;
+
+    private GrievanceService grievanceService;
     @Autowired
-    public MainController(BookingService bookingService,UserService userService,ChatService chatService) {
+    public MainController(BookingService bookingService,UserService userService,GrievanceService grievanceService) {
         this.bookingService = bookingService;
         this.userService = userService;
-        this.chatService = chatService;
+        this.grievanceService = grievanceService;
     }
 
     @GetMapping("/home")
@@ -42,9 +45,7 @@ public class MainController {
                            @RequestParam(value="pageSize", defaultValue="12",required=false) int pageSize)
     {
         BookingPagination availableBookings = bookingService.getAllAvailableBooking(pageNo,pageSize);
-        log.error("User name: "+ SecurityUtil.getSessionUser());
-        if(SecurityUtil.getSessionUser() != null)
-            log.error("User company name: "+ userService.findByUsername(SecurityUtil.getSessionUser()).getCompanyName());
+        log.info("User name: "+ SecurityUtil.getSessionUser());
         model.addAttribute("bookings", availableBookings);
         return "mainPage";
     }
@@ -124,11 +125,15 @@ public class MainController {
 
             List<BookingEntity> bookingEntities = bookingService.findAllBookings();
             model.addAttribute("bookingsEntities", bookingEntities);
+
+            List<Grievance> grievances = grievanceService.getPendingGrievances();
+            model.addAttribute("grievances", grievances);
         }
         // For all users
         Set<BookingEntity> userConfirmedBooking = user.getConfirmedBookings();
         Set<BookingEntity> userBookingRequest= user.getRequestingBookings();
 
+        model.addAttribute("grievanceService",grievanceService);
         model.addAttribute("userConfirmedBooks",userConfirmedBooking.stream().toList());
         model.addAttribute("userBookingRequest",userBookingRequest.stream().toList());
         model.addAttribute("currentUser", user);

@@ -40,4 +40,5 @@ public interface UserService {
     void deleteUser(Long userId) throws Exception;
 
     void verifyUser(Long userId);
+
 }
