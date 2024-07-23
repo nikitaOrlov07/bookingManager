@@ -1,0 +1,45 @@
+# deployment Spring application
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookingmanager-postgres
+  labels:
+    name:  bookingmanager-postgres
+spec:
+  ports:
+    - nodePort: 30164
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app:  bookingmanager-postgres
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  bookingmanager-postgres
+spec:
+  selector:
+    matchLabels:
+      app: bookingmanager-postgres
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app:  bookingmanager-postgres
+    spec:
+      containers:
+        - name: bookingmanager
+          image: bookingmanager:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+          - name: SPRING_DATASOURCE_URL
+            value: "jdbc:postgresql://booking-postgres-database:5432/bookingManager"
+          - name: SPRING_DATASOURCE_USERNAME
+            value: "postgres"
+          - name: SPRING_DATASOURCE_PASSWORD
+            value: "07022005"

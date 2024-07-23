@@ -1,0 +1,105 @@
+---
+# Define a 'Service' To Expose postgres to Other Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-postgres-database
+  labels:
+    app: booking-postgres-database
+    tier: database
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: booking-postgres-database
+    tier: database
+  clusterIP: None
+
+---
+# Define a 'Persistent Volume Claim'(PVC) for Postgres Storage, dynamically provisioned by cluster
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pv-claim2
+  labels:
+    app: booking-postgres-database
+    tier: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-postgres-database
+  labels:
+    app: booking-postgres-database
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      app: booking-postgres-database
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: booking-postgres-database
+        tier: database
+    spec:
+      containers:
+        - name: booking-postgres-database
+          image: postgres
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres_password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-conf
+                  key: name
+            - name: POSTGRES_INITDB_ARGS
+              value: "--auth-host=scram-sha-256"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-storage2
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "$(POSTGRES_USER)"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+      volumes:
+        - name: postgres-storage2
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim2
+        - name: init-script
+          configMap:
+            name: postgres-conf
+            items:
+              - key: init.sql
+                path: init.sql
