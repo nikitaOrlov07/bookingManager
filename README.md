@@ -33,13 +33,16 @@ All features of unauthenticated users, plus:
 All features of authenticated users, plus:
 - Full booking control
 - User management via admin dashboard
+- Grievance management
+- Delete user , Delete booking enity 
 
 ## Technologies Used
 
 - Backend: Java (Spring Boot)
 - Frontend: JavaScript, CSS, HTML
 - Real-time Chat: WebSocket
-
+- Devops: implement docker and kubernates
+- Create an initial settings file for the database (for Docker containers and Kubernetes pods) -> create an Admin user -> USERNAME: ADMIN, PASSWORD: Admin
 ## Screenshots
 
 ### Main Page
