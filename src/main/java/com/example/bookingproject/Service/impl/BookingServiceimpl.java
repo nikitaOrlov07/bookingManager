@@ -9,7 +9,6 @@ import com.example.bookingproject.Model.BookingEntity;
 import com.example.bookingproject.Model.Comment;
 import com.example.bookingproject.Model.Security.UserEntity;
 import com.example.bookingproject.Repository.BookingEntityRepository;
-import com.example.bookingproject.Repository.RattingRepository;
 import com.example.bookingproject.Security.SecurityUtil;
 import com.example.bookingproject.Service.AttachmentService;
 import com.example.bookingproject.Service.BookingService;
@@ -47,8 +46,7 @@ public class BookingServiceimpl implements BookingService {
     @Lazy
     @Autowired
     private AttachmentService attachmentService;
-    @Autowired
-    private RattingRepository ratingRepository;
+
     Page<BookingEntity> bookingPage =null;
     @Transactional
     @Override
